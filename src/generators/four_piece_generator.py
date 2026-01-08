@@ -255,38 +255,75 @@ class FourPieceGenerator:
             kt_names = []
             if pse_matrix and getattr(pse_matrix, "kt_features", None):
                 kt_names = [f.name for f in pse_matrix.kt_features if getattr(f, "name", None)]
+            # --- Golden Standard: Master Prompt (A-D) ---
             system_prompt = (
-                "You are a strict Patent Examiner. "
-                "You verify that every claim is fully supported by the description. "
-                "Do not introduce any technical term that is not present in the provided invention content."
+                "You are a meticulous Chinese Patent Attorney. You adhere strictly to the CNIPA Patent Examination Guidelines.\n"
+                "Your goal is to draft a patent application that overcomes 'Lack of Clarity' (Article 26.4) and "
+                "'Lack of Support' (Article 26.4) rejections."
             )
-            prompt = (
-                "任务：撰写中文权利要求书草稿（JSON），并进行一致性自检。\n\n"
-                "强制顺序（在你内部完成，不要输出过程文本）：\n"
-                "1) 提取你即将在权利要求中使用的所有技术术语/部件名称（包括缩写/模块名/关键特征）。\n"
-                "2) 对每个术语进行校验：必须能在【发明内容】或【关键技术特征】中找到原词或等价表述；"
-                "如果找不到，就不得引入该术语，必须改用已存在的表述。\n"
-                "3) 通过校验后再生成权利要求，并完整填写 term_map："
-                "每个术语必须有 definition，occurrences 至少包含 claim:1；如能对应到说明书内容，请尽量填写 spec:pN。\n\n"
-                "输出要求：\n"
-                "- 输出必须为 JSON，结构严格符合给定 JSON Schema（字段名不得变更）\n"
-                "- 语言使用中文法言法语，避免绝对化/夸大/主观/商业用语\n"
-                "- independent_claim.text / dependent_claims[].text 均为完整权利要求句子（不包含前置编号）\n"
-                "- number/depends_on 均使用字符串（例如：\"1\"）\n"
-                "- feature_refs 使用如 F1/F2 的引用（可为空），尽量只引用【关键技术特征】中的要点\n"
-                "- 从属权利要求：0~8 项，均从属于权利要求1\n\n"
+
+            section_a = (
+                "【A. 角色与目标】\n"
+                "你是一名细致的中国专利代理师，严格遵循《专利审查指南》。\n"
+                "你的目标是最大化术语一致性、清楚性与支持性，避免因第二十六条第四款导致的驳回。\n"
+            )
+
+            section_b = (
+                "【B. 术语铁律（CRITICAL）】\n"
+                "CRITICAL RULE: Terminology consistency is absolute.\n"
+                "METHOD: 先起草权利要求1，然后从权利要求书中抽取全部技术名词（术语清单）。\n"
+                "你必须在从属权利要求中使用完全相同的名词（中英文/缩写/大小写/全半角均保持一致）。\n"
+                "同义词严格禁止（例如不得在“Controller/Control Unit”之间切换）。\n"
+                "严禁引入【发明内容】与【关键技术特征】未出现的新术语；若不得不用，必须改写为已出现的表述。\n"
+            )
+
+            section_c = (
+                "【C. CNIPA 形式要求】\n"
+                "权利要求书：\n"
+                "- 独立权利要求1必须采用：[前序部分] + [连接词：其特征在于] + [特征部分] 的格式。\n"
+                "- 从属权利要求必须使用标准引用：如权利要求X所述的……。\n"
+                "- 所有技术特征必须能从【发明内容】推导（支持性），避免不必要限定。\n"
+                "- independent_claim.text 必须包含“其特征在于”。\n"
+            )
+
+            section_d = (
+                "【D. 思考过程（仅内部执行，不要输出思考过程）】\n"
+                "Step 1: Analyze the input to identify the core inventive point.\n"
+                "Step 2: Draft Claim 1 to cover the inventive point with maximum scope.\n"
+                "Step 3: Draft Dependent Claims to add fallback positions.\n"
+                "Step 4: Validate terminology list and enforce exact reuse across claims.\n"
+            )
+
+            output_contract = (
+                "【输出要求（JSON）】\n"
+                "- 输出必须为 JSON，结构严格符合给定 JSON Schema（字段名不得变更）。\n"
+                "- independent_claim.text / dependent_claims[].text 均为完整权利要求句子（不包含前置编号）。\n"
+                "- number/depends_on 均使用字符串（例如：\"1\"）。\n"
+                "- 从属权利要求：0~8 项，均从属于权利要求1。\n"
+                "- term_map：必须覆盖你在权利要求中使用的全部关键术语；definition 必须清晰、可支持。\n"
+                "- feature_refs：若使用 F1/F2 等引用，只引用【关键技术特征】中出现的要点。\n"
+                "- 避免绝对化/夸大/主观/商业宣传用语。\n"
+            )
+
+            context = (
+                "【输入】\n"
                 f"发明名称：{title}\n"
                 f"技术领域：{technical_field}\n"
                 f"发明内容：{invention_content}\n"
                 f"关键技术特征（可用）：{kt_names}\n"
             )
 
+            prompt = "\n\n".join([section_a, section_b, section_c, section_d, output_contract, context])
+
+            # Claims should be rigorous: clamp temperature to 0.2~0.4.
+            claims_temperature = float(min(max(float(llm_temperature), 0.2), 0.4))
+
             contract = self.llm_client.generate_structured_data(
                 prompt,
                 _LLMClaimsContract,
                 retries=2,
                 system_prompt=system_prompt,
-                temperature=float(llm_temperature),
+                temperature=claims_temperature,
             )
             if contract is not None:
                 meta = self.llm_client.get_last_meta()
@@ -411,30 +448,58 @@ class FourPieceGenerator:
         llm_temperature: float = 0.7,
     ) -> Tuple[Abstract, Dict]:
         if (not self.force_rules) and self.llm_client.is_configured():
+            kt_names = []
+            if pse_matrix and getattr(pse_matrix, "kt_features", None):
+                kt_names = [f.name for f in pse_matrix.kt_features if getattr(f, "name", None)]
+
             system_prompt = (
-                "You are a strict Patent Examiner. "
-                "You verify that every technical term in the abstract is supported by the description."
+                "You are a meticulous Chinese Patent Attorney. You adhere strictly to the CNIPA Patent Examination Guidelines.\n"
+                "Your goal is to write a compliant abstract that does not introduce unsupported terminology."
             )
-            prompt = (
-                "任务：撰写中文专利摘要（JSON），并进行一致性自检。\n\n"
-                "强制顺序（在你内部完成，不要输出过程文本）：\n"
-                "1) 列出你将用于摘要的全部技术术语。\n"
-                "2) 校验每个术语：必须能在【发明内容】中找到原词或等价表述；否则不得引入。\n"
-                "3) 通过校验后再生成 summary。\n\n"
-                "要求：\n"
-                "- 输出必须为 JSON，结构严格符合给定 JSON Schema（字段名不得变更）\n"
-                "- summary 为中文摘要正文，<= 500 字，客观表述，不含绝对化/夸大/主观用语\n"
-                "- 内容应包含：技术领域、要解决的技术问题、技术方案要点、技术效果（客观）\n\n"
+
+            section_a = (
+                "【A. 角色与目标】\n"
+                "你是一名细致的中国专利代理师，严格遵循《专利审查指南》。\n"
+                "目标：摘要用语客观、术语一致，不引入未支持术语。\n"
+            )
+
+            section_b = (
+                "【B. 术语铁律（CRITICAL）】\n"
+                "摘要中的技术名词必须与【发明内容】/【关键技术特征】完全一致；严禁同义词替换与新增术语。\n"
+            )
+
+            section_d = (
+                "【D. 思考过程（仅内部执行，不要输出思考过程）】\n"
+                "Step 1: Identify the core inventive point.\n"
+                "Step 2: Ensure terminology matches the invention content.\n"
+                "Step 3: Write a concise, objective abstract.\n"
+            )
+
+            output_contract = (
+                "【输出要求（JSON）】\n"
+                "- 输出必须为 JSON，结构严格符合给定 JSON Schema（字段名不得变更）。\n"
+                "- summary：30~500 字，客观表述，不含绝对化/夸大/主观/商业宣传用语。\n"
+                "- 内容应包含：技术领域、要解决的技术问题、技术方案要点、技术效果（客观）。\n"
+            )
+
+            context = (
+                "【输入】\n"
                 f"发明名称：{title}\n"
                 f"技术领域：{technical_field}\n"
                 f"发明内容：{invention_content}\n"
+                f"关键技术特征（可用）：{kt_names}\n"
             )
+
+            prompt = "\n\n".join([section_a, section_b, section_d, output_contract, context])
+
+            # Abstract can allow slightly more creativity than claims, but keep bounded.
+            abstract_temperature = float(min(max(float(llm_temperature), 0.2), 0.6))
             contract = self.llm_client.generate_structured_data(
                 prompt,
                 _LLMAbstractContract,
                 retries=1,
                 system_prompt=system_prompt,
-                temperature=float(llm_temperature),
+                temperature=abstract_temperature,
             )
             if contract is not None:
                 meta = self.llm_client.get_last_meta()
