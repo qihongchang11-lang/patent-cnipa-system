@@ -140,16 +140,54 @@ def _run_monolithic_pipeline(
     return zip_buf.getvalue(), docs, report
 
 
+def _create_zip_bytes(
+    generated_results: Dict[str, str],
+    report: Dict[str, Any],
+    docx_bytes: bytes,
+) -> bytes:
+    zip_buf = io.BytesIO()
+    with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr("specification.md", (generated_results.get("specification.md") or ""))
+        zf.writestr("claims.md", (generated_results.get("claims.md") or ""))
+        zf.writestr("abstract.md", (generated_results.get("abstract.md") or ""))
+        zf.writestr("disclosure.md", (generated_results.get("disclosure.md") or ""))
+        zf.writestr("quality_report.json", json.dumps(report or {}, ensure_ascii=False, indent=2))
+        if docx_bytes:
+            zf.writestr("patent.docx", docx_bytes)
+    return zip_buf.getvalue()
+
+
 def _init_session_state() -> None:
-    st.session_state.setdefault("generated_result", None)  # {"zip_bytes":..., "docs":..., "report":...}
+    # Canonical persisted outputs (for edit/save)
+    st.session_state.setdefault("generated_results", {})  # specification.md/claims.md/abstract.md/disclosure.md
+    st.session_state.setdefault("zip_bytes", b"")
+    st.session_state.setdefault("docx_bytes", b"")
+    st.session_state.setdefault("quality_report", {})
+
+    # Editor buffers (bound to widgets)
+    st.session_state.setdefault("edit_specification", "")
+    st.session_state.setdefault("edit_claims", "")
+    st.session_state.setdefault("edit_abstract", "")
+    st.session_state.setdefault("edit_disclosure", "")
+
+    # UX state
     st.session_state.setdefault("processing_complete", False)
     st.session_state.setdefault("last_error", "")
+    st.session_state.setdefault("save_message", "")
 
 
 def _reset_results() -> None:
-    st.session_state.generated_result = None
+    st.session_state.generated_results = {}
+    st.session_state.zip_bytes = b""
+    st.session_state.docx_bytes = b""
+    st.session_state.quality_report = {}
+    st.session_state.edit_specification = ""
+    st.session_state.edit_claims = ""
+    st.session_state.edit_abstract = ""
+    st.session_state.edit_disclosure = ""
     st.session_state.processing_complete = False
     st.session_state.last_error = ""
+    st.session_state.save_message = ""
 
 
 def _render_quality_details(report: Dict[str, Any]) -> None:
@@ -254,6 +292,7 @@ with input_col:
         else:
             st.session_state.processing_complete = False
             st.session_state.last_error = ""
+            st.session_state.save_message = ""
             with st.spinner("Generating draft..."):
                 try:
                     zip_bytes, docs, report = _run_monolithic_pipeline(
@@ -268,7 +307,21 @@ with input_col:
                 except Exception as e:
                     st.session_state.last_error = str(e)
                 else:
-                    st.session_state.generated_result = {"zip_bytes": zip_bytes, "docs": docs, "report": report}
+                    st.session_state.generated_results = dict(docs or {})
+                    st.session_state.quality_report = dict(report or {})
+                    st.session_state.zip_bytes = zip_bytes or b""
+                    # Keep patent.docx if present (for regenerated ZIP after edits)
+                    try:
+                        with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
+                            st.session_state.docx_bytes = zf.read("patent.docx")
+                    except Exception:
+                        st.session_state.docx_bytes = b""
+
+                    # Initialize editor buffers to generated content (overwrites previous edits on new generation)
+                    st.session_state.edit_specification = st.session_state.generated_results.get("specification.md", "")
+                    st.session_state.edit_claims = st.session_state.generated_results.get("claims.md", "")
+                    st.session_state.edit_abstract = st.session_state.generated_results.get("abstract.md", "")
+                    st.session_state.edit_disclosure = st.session_state.generated_results.get("disclosure.md", "")
                     st.session_state.processing_complete = True
 
 with output_col:
@@ -277,16 +330,18 @@ with output_col:
     if st.session_state.get("last_error"):
         st.error(f"Generation failed: {st.session_state.get('last_error')}")
 
-    generated = st.session_state.get("generated_result") or {}
-    report = generated.get("report", {}) if isinstance(generated, dict) else {}
-    docs = generated.get("docs", {}) if isinstance(generated, dict) else {}
-    zip_bytes = generated.get("zip_bytes", b"") if isinstance(generated, dict) else b""
+    report = st.session_state.get("quality_report") or {}
+    docs = st.session_state.get("generated_results") or {}
+    zip_bytes = st.session_state.get("zip_bytes") or b""
 
     score = float(report.get("quality_score", 0.0) or 0.0) if isinstance(report, dict) else 0.0
     st.metric(label="Quality Score", value=f"{score:.2f}")
 
     if isinstance(report, dict) and (report.get("success") is False):
         st.warning("Quality checks flagged issues, please review draft below.")
+
+    if st.session_state.get("save_message"):
+        st.success(st.session_state.get("save_message"))
 
     if zip_bytes:
         st.download_button(
@@ -299,13 +354,31 @@ with output_col:
 
     tab1, tab2, tab3, tab4 = st.tabs(["Specification", "Claims", "Abstract", "Disclosure"])
     with tab1:
-        st.text_area("specification.md", value=str((docs or {}).get("specification.md", "")), height=600)
+        st.text_area("specification.md", key="edit_specification", height=600)
     with tab2:
-        st.text_area("claims.md", value=str((docs or {}).get("claims.md", "")), height=600)
+        st.text_area("claims.md", key="edit_claims", height=600)
     with tab3:
-        st.text_area("abstract.md", value=str((docs or {}).get("abstract.md", "")), height=600)
+        st.text_area("abstract.md", key="edit_abstract", height=600)
     with tab4:
-        st.text_area("disclosure.md", value=str((docs or {}).get("disclosure.md", "")), height=600)
+        st.text_area("disclosure.md", key="edit_disclosure", height=600)
+
+    st.markdown("###")
+    save_btn = st.button("💾 Save Changes & Update ZIP", use_container_width=True)
+    if save_btn:
+        # Update session_state outputs from current editor buffers
+        st.session_state.generated_results = {
+            "specification.md": str(st.session_state.get("edit_specification", "") or ""),
+            "claims.md": str(st.session_state.get("edit_claims", "") or ""),
+            "abstract.md": str(st.session_state.get("edit_abstract", "") or ""),
+            "disclosure.md": str(st.session_state.get("edit_disclosure", "") or ""),
+        }
+        st.session_state.zip_bytes = _create_zip_bytes(
+            st.session_state.generated_results,
+            dict(st.session_state.get("quality_report") or {}),
+            bytes(st.session_state.get("docx_bytes") or b""),
+        )
+        st.session_state.save_message = "✅ Draft updated. Ready to download."
+        st.rerun()
 
     with st.expander("View Quality Details"):
         if isinstance(report, dict) and report:
