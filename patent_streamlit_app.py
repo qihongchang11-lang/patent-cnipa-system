@@ -3,6 +3,59 @@ import requests
 import os
 import time
 from dotenv import load_dotenv
+from typing import Optional
+
+_DOTENV_LOADED = False
+
+
+def _ensure_dotenv_loaded() -> None:
+    global _DOTENV_LOADED
+    if _DOTENV_LOADED:
+        return
+    try:
+        # Local dev fallback only; Streamlit Community Cloud should use st.secrets/env vars.
+        load_dotenv()
+    except Exception:
+        pass
+    _DOTENV_LOADED = True
+
+
+def _get_setting(key: str) -> str:
+    # 1) Streamlit Cloud secrets (highest priority)
+    try:
+        v = st.secrets.get(key)  # type: ignore[attr-defined]
+        if v is not None and str(v).strip():
+            return str(v).strip()
+    except Exception:
+        pass
+
+    # 2) Environment variables
+    v = os.getenv(key)
+    if v and v.strip():
+        return v.strip()
+
+    # 3) Local .env fallback
+    _ensure_dotenv_loaded()
+    v = os.getenv(key)
+    return (v or "").strip()
+
+
+def _get_llm_api_key() -> str:
+    # Compatible key names: LLM_API_KEY or OPENAI_API_KEY
+    return _get_setting("LLM_API_KEY") or _get_setting("OPENAI_API_KEY")
+
+
+def _init_openai_client(api_key: str, base_url: str):
+    if not api_key:
+        return None
+    try:
+        from openai import OpenAI
+
+        if base_url:
+            return OpenAI(api_key=api_key, base_url=base_url)
+        return OpenAI(api_key=api_key)
+    except Exception:
+        return None
 
 # 1. 页面基础配置 (必须是第一个 Streamlit 命令)
 st.set_page_config(
@@ -11,9 +64,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# 加载环境变量
-load_dotenv()
 
 # 2. 自定义 CSS 美化 (注入灵魂)
 st.markdown("""
@@ -66,13 +116,20 @@ with st.sidebar:
     st.title("⚙️ 系统控制台")
     st.markdown("---")
     
-    # API 状态检测
-    api_key = os.getenv("API_KEY")
-    if api_key:
-        st.success("✅ API 服务已连接")
+    llm_api_key = _get_llm_api_key()
+    llm_base_url = _get_setting("LLM_BASE_URL")
+    llm_model = _get_setting("LLM_MODEL")
+    _openai_client = _init_openai_client(llm_api_key, llm_base_url)
+
+    if llm_api_key:
+        st.success("✅ 鉴权通过（LLM_API_KEY / OPENAI_API_KEY）")
     else:
-        st.error("❌ 未检测到 API 密钥")
-        st.warning("请检查 .env 文件")
+        st.info("ℹ️ 未配置 LLM 密钥（可在 Streamlit Secrets 或环境变量中配置）")
+
+    if llm_base_url:
+        st.caption(f"LLM_BASE_URL: {llm_base_url}")
+    if llm_model:
+        st.caption(f"LLM_MODEL: {llm_model}")
 
     st.markdown("###  操作指南")
     st.info(
@@ -110,7 +167,7 @@ st.markdown("###") # 占位空行
 generate_btn = st.button(" 立即开始生成专利文档", type="primary")
 
 # 后端 API 地址
-API_URL = os.getenv("PUBLIC_API_BASE_URL", "http://api:8000")
+API_URL = _get_setting("PUBLIC_API_BASE_URL") or "http://127.0.0.1:8000"
 
 if generate_btn:
     if not title or not tech_field:
