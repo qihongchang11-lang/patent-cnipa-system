@@ -363,6 +363,6 @@ with col_output:
             )
 
 st.markdown(
-    "<p style='text-align: center; color: #6B7280; margin-top: 2em;'>© 2026 动力车间 | 内部科研专业系统（V3.0）</p>",
+    "<p style='text-align: center; color: #6B7280; margin-top: 2em;'>© 2026 基于AI大模型的 CNIPA系统</p>",
     unsafe_allow_html=True,
 )
