@@ -11,12 +11,7 @@ from typing import Any, Dict, Tuple
 import streamlit as st
 
 # Streamlit requirement: set_page_config must be the first Streamlit command.
-st.set_page_config(
-    page_title="CNIPA Patent Draft Generator",
-    page_icon="⚖️",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+st.set_page_config(page_title="CNIPA Patent System", layout="wide")
 
 # Ensure `src/` imports work on Streamlit Community Cloud
 REPO_ROOT = Path(__file__).resolve().parent
@@ -224,25 +219,21 @@ with st.sidebar:
         st.rerun()
 
 
-st.markdown("## ⚖️ CNIPA Patent Draft Generator")
+st.markdown("## ⚖️ CNIPA Patent System")
 
-control_panel = st.container()
-result_workspace = st.container()
+input_col, output_col = st.columns([0.4, 0.6])
 
-with control_panel:
-    st.subheader("Control Panel (Input)")
+with input_col:
+    st.markdown("### ✍️ Input Workspace")
 
-    col1, col2 = st.columns([2, 3])
-    with col1:
-        st.text_input("Title", key="input_title", placeholder="e.g., An AI-assisted patent drafting system")
-        st.checkbox("Enable quality checks", key="input_enable_checks", value=True)
-    with col2:
-        st.text_area("Technical field", key="input_technical_field", height=120)
-
+    st.text_input("Title", key="input_title", placeholder="e.g., An AI-assisted patent drafting system")
+    st.text_area("Technical field", key="input_technical_field", height=120)
     st.text_area("Background", key="input_background", height=120)
     st.text_area("Invention content", key="input_invention_content", height=180)
     st.text_area("Embodiments", key="input_embodiments", height=220)
+    st.checkbox("Enable quality checks", key="input_enable_checks", value=True)
 
+    st.markdown("###")
     generate_btn = st.button("Generate", type="primary", use_container_width=True)
 
     if generate_btn:
@@ -274,9 +265,8 @@ with control_panel:
                     st.session_state.generated_result = {"zip_bytes": zip_bytes, "docs": docs, "report": report}
                     st.session_state.processing_complete = True
 
-
-with result_workspace:
-    st.subheader("Result Workspace (Output)")
+with output_col:
+    st.markdown("###  Review & Export")
 
     if st.session_state.get("last_error"):
         st.error(f"Generation failed: {st.session_state.get('last_error')}")
@@ -289,7 +279,6 @@ with result_workspace:
     score = float(report.get("quality_score", 0.0) or 0.0) if isinstance(report, dict) else 0.0
     st.metric(label="Quality Score", value=f"{score:.2f}")
 
-    # Soft-fail architecture: NEVER block the flow based on quality-check outcomes.
     if isinstance(report, dict) and (report.get("success") is False):
         st.warning("Quality checks flagged issues, please review draft below.")
 
@@ -304,13 +293,13 @@ with result_workspace:
 
     tab1, tab2, tab3, tab4 = st.tabs(["Specification", "Claims", "Abstract", "Disclosure"])
     with tab1:
-        st.text_area("specification.md", value=str((docs or {}).get("specification.md", "")), height=520)
+        st.text_area("specification.md", value=str((docs or {}).get("specification.md", "")), height=600)
     with tab2:
-        st.text_area("claims.md", value=str((docs or {}).get("claims.md", "")), height=520)
+        st.text_area("claims.md", value=str((docs or {}).get("claims.md", "")), height=600)
     with tab3:
-        st.text_area("abstract.md", value=str((docs or {}).get("abstract.md", "")), height=520)
+        st.text_area("abstract.md", value=str((docs or {}).get("abstract.md", "")), height=600)
     with tab4:
-        st.text_area("disclosure.md", value=str((docs or {}).get("disclosure.md", "")), height=520)
+        st.text_area("disclosure.md", value=str((docs or {}).get("disclosure.md", "")), height=600)
 
     with st.expander("View Quality Details"):
         if isinstance(report, dict) and report:
