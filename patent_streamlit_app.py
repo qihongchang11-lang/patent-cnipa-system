@@ -35,9 +35,18 @@ st.markdown(
 header {visibility: hidden;}
 footer {visibility: hidden;}
 
+/* Compact single-page layout */
+.block-container {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 /* Center titles */
-h1 { text-align: center; }
-.subtitle { text-align: center; color: gray; margin-bottom: 2em; }
+h1 { text-align: center; margin-bottom: 0.25rem; }
+.subtitle { text-align: center; color: gray; margin-top: 0; margin-bottom: 1rem; }
+
+/* Reduce widget label spacing */
+div[data-testid="stWidgetLabel"] { margin-bottom: 0.15rem; }
 
 /* Block-style tabs */
 .stTabs [data-baseweb="tab-list"] { gap: 8px; }
@@ -205,7 +214,7 @@ st.markdown(
 # Sidebar (系统参数设置)
 # -----------------------
 with st.sidebar:
-    st.write("")
+    st.markdown("<div style='height:0.25rem;'></div>", unsafe_allow_html=True)
     st.markdown("### ⚙️ 系统参数控制台")
     st.markdown("---")
     st.slider(
@@ -237,19 +246,19 @@ with col_input:
     bg = st.text_area(
         "背景技术（现有技术痛点）",
         key="input_background",
-        height=280,
+        height=130,
         placeholder="请描述当前技术或工艺存在的主要痛点。例如：人工效率低、废品率高、设备故障频繁...",
     )
     inv_content = st.text_area(
         "发明内容（核心技术方案）",
         key="input_invention_content",
-        height=280,
+        height=130,
         placeholder="请详细描述您的改进方案。例如：增加了XX结构、采用了XX算法、优化了XX流程...",
     )
     impl = st.text_area(
         "具体实施方式（可选）",
         key="input_embodiments",
-        height=280,
+        height=130,
         placeholder="可选：补充关键结构/流程的具体实施例、参数范围、实验数据或工艺步骤，以增强支撑性。",
     )
 
@@ -318,13 +327,13 @@ with col_output:
 
         tab_claims, tab_spec, tab_abs, tab_dis = st.tabs(["权利要求书", "说明书", "说明书摘要", "技术交底书"])
         with tab_claims:
-            st.text_area("权利要求书（可编辑）", value=gen.get("claims.md", ""), key="widget_claims", height=600)
+            st.text_area("权利要求书（可编辑）", value=gen.get("claims.md", ""), key="widget_claims", height=520)
         with tab_spec:
-            st.text_area("说明书（可编辑）", value=gen.get("specification.md", ""), key="widget_spec", height=600)
+            st.text_area("说明书（可编辑）", value=gen.get("specification.md", ""), key="widget_spec", height=520)
         with tab_abs:
-            st.text_area("说明书摘要（可编辑）", value=gen.get("abstract.md", ""), key="widget_abs", height=600)
+            st.text_area("说明书摘要（可编辑）", value=gen.get("abstract.md", ""), key="widget_abs", height=520)
         with tab_dis:
-            st.text_area("技术交底书（可编辑）", value=gen.get("disclosure.md", ""), key="widget_dis", height=600)
+            st.text_area("技术交底书（可编辑）", value=gen.get("disclosure.md", ""), key="widget_dis", height=520)
 
         st.markdown("###")
         col_save, col_dl = st.columns(2)
