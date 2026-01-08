@@ -86,6 +86,7 @@ def _run_monolithic_pipeline(
     invention_content: str,
     embodiments: str,
     enable_checks: bool,
+    llm_temperature: float,
 ) -> Tuple[bytes, Dict[str, str], Dict[str, Any]]:
     """
     Monolithic pipeline: runs everything in-process.
@@ -109,6 +110,7 @@ def _run_monolithic_pipeline(
         invention_content=invention_content,
         embodiments=embodiments,
         pse_matrix=pse_matrix,
+        llm_temperature=float(llm_temperature),
     )
 
     result = orchestrator.process_patent(patent_doc, enable_checks=bool(enable_checks))
@@ -213,6 +215,8 @@ with st.sidebar:
     if llm_model:
         st.caption(f"LLM_MODEL: {llm_model}")
 
+    st.slider("Creativity", min_value=0.0, max_value=1.0, value=0.2, step=0.05, key="llm_temperature")
+
     st.divider()
     if st.button("Reset Result", use_container_width=True):
         _reset_results()
@@ -243,6 +247,7 @@ with input_col:
         invention_content = str(st.session_state.get("input_invention_content", "") or "").strip()
         embodiments = str(st.session_state.get("input_embodiments", "") or "").strip()
         enable_checks = bool(st.session_state.get("input_enable_checks", True))
+        llm_temperature = float(st.session_state.get("llm_temperature", 0.2) or 0.2)
 
         if not title or not technical_field:
             st.warning("Please fill in Title and Technical field.")
@@ -258,6 +263,7 @@ with input_col:
                         invention_content=invention_content or technical_field,
                         embodiments=embodiments,
                         enable_checks=enable_checks,
+                        llm_temperature=llm_temperature,
                     )
                 except Exception as e:
                     st.session_state.last_error = str(e)

@@ -98,10 +98,17 @@ class FourPieceGenerator:
 {detailed_description}
 """
 
-    def generate_all(self, title: str, technical_field: str, background: str,
-                    invention_content: str, embodiments: str,
-                    pse_matrix: Optional[PSEMatrix] = None,
-                    drawings_description: Optional[str] = None) -> PatentDocument:
+    def generate_all(
+        self,
+        title: str,
+        technical_field: str,
+        background: str,
+        invention_content: str,
+        embodiments: str,
+        pse_matrix: Optional[PSEMatrix] = None,
+        drawings_description: Optional[str] = None,
+        llm_temperature: float = 0.2,
+    ) -> PatentDocument:
         """Generate all four patent documents"""
 
         # Create metadata
@@ -127,6 +134,7 @@ class FourPieceGenerator:
             technical_field=technical_field,
             invention_content=invention_content,
             pse_matrix=pse_matrix,
+            llm_temperature=llm_temperature,
         )
 
         # Generate abstract (Phase 1: LLM-first + fallback)
@@ -135,6 +143,7 @@ class FourPieceGenerator:
             technical_field=technical_field,
             invention_content=invention_content,
             pse_matrix=pse_matrix,
+            llm_temperature=llm_temperature,
         )
 
         # Generate disclosure
@@ -215,34 +224,56 @@ class FourPieceGenerator:
             content=full_specification
         )
 
-    def generate_claims(self, title: str, technical_field: str,
-                       invention_content: str, pse_matrix: Optional[PSEMatrix] = None) -> Claims:
+    def generate_claims(
+        self,
+        title: str,
+        technical_field: str,
+        invention_content: str,
+        pse_matrix: Optional[PSEMatrix] = None,
+        llm_temperature: float = 0.2,
+    ) -> Claims:
         """Generate patent claims"""
         claims, _audit = self._generate_claims_with_audit(
             title=title,
             technical_field=technical_field,
             invention_content=invention_content,
             pse_matrix=pse_matrix,
+            llm_temperature=llm_temperature,
         )
         return claims
 
     def _generate_claims_with_audit(
-        self, title: str, technical_field: str, invention_content: str, pse_matrix: Optional[PSEMatrix]
+        self,
+        title: str,
+        technical_field: str,
+        invention_content: str,
+        pse_matrix: Optional[PSEMatrix],
+        llm_temperature: float = 0.2,
     ) -> Tuple[Claims, Dict]:
         # 1) Try LLM (structured JSON)
         if (not self.force_rules) and self.llm_client.is_configured():
             kt_names = []
             if pse_matrix and getattr(pse_matrix, "kt_features", None):
                 kt_names = [f.name for f in pse_matrix.kt_features if getattr(f, "name", None)]
+            system_prompt = (
+                "You are a strict Patent Examiner. "
+                "You verify that every claim is fully supported by the description. "
+                "Do not introduce any technical term that is not present in the provided invention content."
+            )
             prompt = (
-                "你是一名严谨的中国专利代理师。请基于给定材料撰写权利要求书草稿。\n"
-                "要求：\n"
+                "任务：撰写中文权利要求书草稿（JSON），并进行一致性自检。\n\n"
+                "强制顺序（在你内部完成，不要输出过程文本）：\n"
+                "1) 提取你即将在权利要求中使用的所有技术术语/部件名称（包括缩写/模块名/关键特征）。\n"
+                "2) 对每个术语进行校验：必须能在【发明内容】或【关键技术特征】中找到原词或等价表述；"
+                "如果找不到，就不得引入该术语，必须改用已存在的表述。\n"
+                "3) 通过校验后再生成权利要求，并完整填写 term_map："
+                "每个术语必须有 definition，occurrences 至少包含 claim:1；如能对应到说明书内容，请尽量填写 spec:pN。\n\n"
+                "输出要求：\n"
                 "- 输出必须为 JSON，结构严格符合给定 JSON Schema（字段名不得变更）\n"
-                "- 语言使用中文法言法语，避免绝对化/夸大/主观/商业用语（如：绝对、完全、最优、最好、显然、便宜等）\n"
+                "- 语言使用中文法言法语，避免绝对化/夸大/主观/商业用语\n"
                 "- independent_claim.text / dependent_claims[].text 均为完整权利要求句子（不包含前置编号）\n"
                 "- number/depends_on 均使用字符串（例如：\"1\"）\n"
-                "- feature_refs 使用如 F1/F2 的引用（可为空）\n"
-                "- term_map 为术语字典：key=术语，value 包含 definition 与 occurrences（如 claim:1/spec:p3）\n"
+                "- feature_refs 使用如 F1/F2 的引用（可为空），尽量只引用【关键技术特征】中的要点\n"
                 "- 从属权利要求：0~8 项，均从属于权利要求1\n\n"
                 f"发明名称：{title}\n"
                 f"技术领域：{technical_field}\n"
@@ -250,7 +281,13 @@ class FourPieceGenerator:
                 f"关键技术特征（可用）：{kt_names}\n"
             )
 
-            contract = self.llm_client.generate_structured_data(prompt, _LLMClaimsContract, retries=2)
+            contract = self.llm_client.generate_structured_data(
+                prompt,
+                _LLMClaimsContract,
+                retries=2,
+                system_prompt=system_prompt,
+                temperature=float(llm_temperature),
+            )
             if contract is not None:
                 meta = self.llm_client.get_last_meta()
                 indep_num = _safe_int(contract.independent_claim.number, default=1)
@@ -348,23 +385,42 @@ class FourPieceGenerator:
             content=claims_text
         )
 
-    def generate_abstract(self, title: str, technical_field: str,
-                         invention_content: str) -> Abstract:
+    def generate_abstract(
+        self,
+        title: str,
+        technical_field: str,
+        invention_content: str,
+        llm_temperature: float = 0.2,
+    ) -> Abstract:
         """Generate patent abstract"""
         abstract, _audit = self._generate_abstract_with_audit(
             title=title,
             technical_field=technical_field,
             invention_content=invention_content,
             pse_matrix=None,
+            llm_temperature=llm_temperature,
         )
         return abstract
 
     def _generate_abstract_with_audit(
-        self, title: str, technical_field: str, invention_content: str, pse_matrix: Optional[PSEMatrix]
+        self,
+        title: str,
+        technical_field: str,
+        invention_content: str,
+        pse_matrix: Optional[PSEMatrix],
+        llm_temperature: float = 0.2,
     ) -> Tuple[Abstract, Dict]:
         if (not self.force_rules) and self.llm_client.is_configured():
+            system_prompt = (
+                "You are a strict Patent Examiner. "
+                "You verify that every technical term in the abstract is supported by the description."
+            )
             prompt = (
-                "你是一名严谨的中国专利代理师。请基于给定材料撰写摘要。\n"
+                "任务：撰写中文专利摘要（JSON），并进行一致性自检。\n\n"
+                "强制顺序（在你内部完成，不要输出过程文本）：\n"
+                "1) 列出你将用于摘要的全部技术术语。\n"
+                "2) 校验每个术语：必须能在【发明内容】中找到原词或等价表述；否则不得引入。\n"
+                "3) 通过校验后再生成 summary。\n\n"
                 "要求：\n"
                 "- 输出必须为 JSON，结构严格符合给定 JSON Schema（字段名不得变更）\n"
                 "- summary 为中文摘要正文，<= 500 字，客观表述，不含绝对化/夸大/主观用语\n"
@@ -373,7 +429,13 @@ class FourPieceGenerator:
                 f"技术领域：{technical_field}\n"
                 f"发明内容：{invention_content}\n"
             )
-            contract = self.llm_client.generate_structured_data(prompt, _LLMAbstractContract, retries=1)
+            contract = self.llm_client.generate_structured_data(
+                prompt,
+                _LLMAbstractContract,
+                retries=1,
+                system_prompt=system_prompt,
+                temperature=float(llm_temperature),
+            )
             if contract is not None:
                 meta = self.llm_client.get_last_meta()
                 abstract_content = f"""摘要

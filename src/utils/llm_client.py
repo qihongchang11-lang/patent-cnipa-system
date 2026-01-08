@@ -70,7 +70,14 @@ class LLMClient:
             "model": self._config.model,
         }
 
-    def generate_text(self, prompt: str, retries: int = 1) -> Optional[str]:
+    def generate_text(
+        self,
+        prompt: str,
+        retries: int = 1,
+        *,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.2,
+    ) -> Optional[str]:
         trace_id = str(uuid.uuid4())
         self._set_last_meta(trace_id)
 
@@ -78,14 +85,12 @@ class LLMClient:
             logger.info("LLM not configured; skipping generate_text")
             return None
 
-        messages = [
-            {"role": "system", "content": "You are a careful assistant. Return only the requested content."},
-            {"role": "user", "content": prompt},
-        ]
+        sys_content = system_prompt or "You are a careful assistant. Return only the requested content."
+        messages = [{"role": "system", "content": sys_content}, {"role": "user", "content": prompt}]
 
         for attempt in range(max(1, retries + 1)):
             try:
-                content = self._chat(messages=messages, response_format=None)
+                content = self._chat(messages=messages, response_format=None, temperature=temperature)
                 if content and content.strip():
                     return content.strip()
             except Exception as e:
@@ -93,7 +98,13 @@ class LLMClient:
         return None
 
     def generate_structured_data(
-        self, prompt: str, pydantic_model: Type[BaseModel], retries: int = 2
+        self,
+        prompt: str,
+        pydantic_model: Type[BaseModel],
+        retries: int = 2,
+        *,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.2,
     ) -> Optional[BaseModel]:
         trace_id = str(uuid.uuid4())
         self._set_last_meta(trace_id)
@@ -108,25 +119,24 @@ class LLMClient:
         except Exception:
             schema_hint = ""
 
+        sys_lines = [
+            (system_prompt or "You are a careful assistant.").strip(),
+            "Return ONLY valid JSON (no markdown, no code fences, no commentary).",
+            "The JSON must conform to the provided JSON Schema.",
+        ]
         base_messages = [
-            {
-                "role": "system",
-                "content": (
-                    "You are a careful assistant.\n"
-                    "Return ONLY valid JSON (no markdown, no code fences, no commentary).\n"
-                    "The JSON must conform to the provided JSON Schema."
-                ),
-            },
-            {
-                "role": "user",
-                "content": f"{prompt}\n\nJSON Schema:\n{schema_hint}",
-            },
+            {"role": "system", "content": "\n".join([x for x in sys_lines if x])},
+            {"role": "user", "content": f"{prompt}\n\nJSON Schema:\n{schema_hint}"},
         ]
 
         last_raw: Optional[str] = None
         for attempt in range(max(1, retries + 1)):
             try:
-                raw = self._chat(messages=base_messages, response_format={"type": "json_object"})
+                raw = self._chat(
+                    messages=base_messages,
+                    response_format={"type": "json_object"},
+                    temperature=temperature,
+                )
                 last_raw = raw
                 parsed = self._parse_json_safely(raw)
                 if parsed is None:
@@ -193,7 +203,7 @@ class LLMClient:
             trace_id=trace_id, provider=cfg.provider, base_url=cfg.base_url, model=cfg.model
         )
 
-    def _chat(self, messages: list, response_format: Optional[dict]) -> str:
+    def _chat(self, messages: list, response_format: Optional[dict], *, temperature: float) -> str:
         # Avoid importing heavy SDK unless configured
         if not self._config:
             raise RuntimeError("LLM config missing")
@@ -208,7 +218,7 @@ class LLMClient:
         kwargs = {
             "model": self._config.model,
             "messages": messages,
-            "temperature": 0.2,
+            "temperature": float(temperature),
         }
         if response_format is not None:
             kwargs["response_format"] = response_format
