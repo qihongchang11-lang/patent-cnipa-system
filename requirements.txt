@@ -5,3 +5,7 @@ python-dotenv
 pandas
 fastapi
 uvicorn
+jieba
+python-docx
+beautifulsoup4
+lxml
