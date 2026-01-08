@@ -205,7 +205,9 @@ st.markdown(
 # Sidebar (系统参数设置)
 # -----------------------
 with st.sidebar:
-    st.markdown("## ⚙️ 系统参数设置")
+    st.write("")
+    st.markdown("### ⚙️ 系统参数控制台")
+    st.markdown("---")
     st.slider(
         "创新发散度 (Temperature)",
         min_value=0.0,
@@ -216,6 +218,7 @@ with st.sidebar:
         help="0.2=严谨模式(权利要求); 0.5=发散模式(背景技术)",
     )
     st.info("当前内核: DeepSeek V3 (商业版)")
+    st.markdown("---")
 
 
 # -----------------------
@@ -234,16 +237,21 @@ with col_input:
     bg = st.text_area(
         "背景技术（现有技术痛点）",
         key="input_background",
-        height=150,
+        height=280,
         placeholder="请描述当前技术或工艺存在的主要痛点。例如：人工效率低、废品率高、设备故障频繁...",
     )
     inv_content = st.text_area(
         "发明内容（核心技术方案）",
         key="input_invention_content",
-        height=200,
+        height=280,
         placeholder="请详细描述您的改进方案。例如：增加了XX结构、采用了XX算法、优化了XX流程...",
     )
-    impl = st.text_area("具体实施方式（可选）", key="input_embodiments", height=100)
+    impl = st.text_area(
+        "具体实施方式（可选）",
+        key="input_embodiments",
+        height=280,
+        placeholder="可选：补充关键结构/流程的具体实施例、参数范围、实验数据或工艺步骤，以增强支撑性。",
+    )
 
     st.markdown("###")
     generate_btn = st.button(" 开始生成专利申请草稿", type="primary", use_container_width=True)
@@ -291,13 +299,16 @@ with col_input:
 # Right: 生成结果与质检
 # -----------------------
 with col_output:
-    st.markdown("### 🧪 生成结果与质检")
+    st.markdown("### ✍️ 生成结果与质检")
 
     if st.session_state.get("last_error"):
         st.error(f"生成失败：{st.session_state.get('last_error')}")
 
     if not st.session_state.get("generated_results"):
-        st.info(" 请在左侧工作台输入技术方案并启动生成。")
+        st.markdown(
+            "<div style='color:#6B7280; padding: 0.25rem 0 0.5rem 0;'>请在左侧工作台输入技术方案并启动生成。</div>",
+            unsafe_allow_html=True,
+        )
     else:
         report = st.session_state.get("quality_report") or {}
         score = float((report or {}).get("quality_score", 0.0) or 0.0)
@@ -343,6 +354,6 @@ with col_output:
             )
 
 st.markdown(
-    "<p style='text-align: center; color: #6B7280; margin-top: 2em;'>© 2026 宁波卷烟厂 | 内部科研专用系统</p>",
+    "<p style='text-align: center; color: #6B7280; margin-top: 2em;'>© 2026 动力车间 | 内部科研专业系统（V3.0）</p>",
     unsafe_allow_html=True,
 )
