@@ -1,0 +1,791 @@
+{
+  "success": false,
+  "quality_score": 0.48749999999999993,
+  "check_results": {
+    "ktf_completeness": {
+      "passed": false,
+      "score": 0.35,
+      "details": {
+        "ktf_features_count": 6,
+        "problems_count": 0,
+        "solutions_count": 0,
+        "effects_count": 0,
+        "missing_elements": [
+          "problems",
+          "solutions",
+          "effects"
+        ],
+        "recommendations": [
+          "Document at least one technical problem",
+          "Document at least one technical solution",
+          "Document at least one technical effect",
+          "Good: Rich set of technical features documented"
+        ],
+        "errors": [],
+        "warnings": [
+          "KTF feature 1: Description is too short",
+          "KTF feature 2: Description is too short",
+          "KTF feature 3: Description is too short",
+          "KTF feature 4: Description is too short",
+          "KTF feature 5: Description is too short",
+          "KTF feature 6: Description is too short",
+          "Low coherence between problems, solutions, and effects"
+        ]
+      },
+      "errors": [],
+      "warnings": [
+        "KTF feature 1: Description is too short",
+        "KTF feature 2: Description is too short",
+        "KTF feature 3: Description is too short",
+        "KTF feature 4: Description is too short",
+        "KTF feature 5: Description is too short",
+        "KTF feature 6: Description is too short",
+        "Low coherence between problems, solutions, and effects"
+      ]
+    },
+    "supportability": {
+      "passed": false,
+      "score": 0.0,
+      "details": {
+        "claims_count": 6,
+        "supported_claims": 0,
+        "unsupported_claims": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_scores": {
+          "claim_1": 0.0,
+          "claim_2": 0.0,
+          "claim_3": 0.0,
+          "claim_4": 0.0,
+          "claim_5": 0.0,
+          "claim_6": 0.0
+        },
+        "missing_elements": [],
+        "recommendations": [
+          "Ensure all claims are adequately supported by specification",
+          "Add missing technical details to specification"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "term_consistency": {
+      "passed": false,
+      "score": 0.0,
+      "details": {
+        "total_terms": 11,
+        "consistent_terms": 0,
+        "inconsistent_terms": [
+          {
+            "term": "的所述技术还包括名称",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括技术",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括领域",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括背景",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括内容",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "必要的技术特征",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "名称",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "技术",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "领域",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "背景",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "内容",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          }
+        ],
+        "term_usage": {
+          "的所述技术还包括名称": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括技术": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括领域": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括背景": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括内容": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "必要的技术特征": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "名称": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "技术": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "领域": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "背景": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "内容": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          }
+        },
+        "recommendations": [
+          "Standardize terminology across all sections",
+          "Use consistent terms for the same concepts"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "banned_words": {
+      "passed": true,
+      "score": 1.0,
+      "details": {
+        "total_violations": 0,
+        "violations_by_category": {},
+        "violations_by_severity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "critical_violations": [],
+        "all_violations": [],
+        "recommendations": [
+          "Excellent: No banned words detected"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "abstract_validation": {
+      "passed": true,
+      "score": 1.0,
+      "details": {
+        "length": 80,
+        "has_title": true,
+        "has_technical_field": true,
+        "has_summary": true,
+        "missing_elements": [],
+        "length_issues": [],
+        "recommendations": [],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "background_leakage": {
+      "passed": true,
+      "score": 1.0,
+      "details": {
+        "background_length": 169,
+        "leakage_issues": [],
+        "overlap_scores": {
+          "invention_content": 0.0,
+          "embodiments": 0.0,
+          "claims": 0.0
+        },
+        "leaked_content": [],
+        "recommendations": [],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "claim_quality": {
+      "passed": true,
+      "score": 1.0,
+      "details": {
+        "issues": [],
+        "recommendations": [],
+        "summary": {
+          "claims_count": 6,
+          "independent_claims_count": 1,
+          "dependent_claims_count": 5,
+          "independent_feature_count": 1,
+          "total_feature_refs": 0,
+          "unsupported_feature_refs": 0,
+          "redundant_dependent_claims_count": 0,
+          "redundant_pairs": []
+        },
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    }
+  },
+  "errors": [
+    "Patent failed quality checks"
+  ],
+  "warnings": [],
+  "processing_time": 0.0,
+  "checks": [
+    {
+      "check": "ktf_completeness",
+      "name": "A 技术完整性（KTF）",
+      "passed": false,
+      "score": 0.35,
+      "errors": [],
+      "warnings": [
+        "KTF feature 1: Description is too short",
+        "KTF feature 2: Description is too short",
+        "KTF feature 3: Description is too short",
+        "KTF feature 4: Description is too short",
+        "KTF feature 5: Description is too short",
+        "KTF feature 6: Description is too short",
+        "Low coherence between problems, solutions, and effects"
+      ],
+      "issues": [],
+      "details": {
+        "ktf_features_count": 6,
+        "problems_count": 0,
+        "solutions_count": 0,
+        "effects_count": 0,
+        "missing_elements": [
+          "problems",
+          "solutions",
+          "effects"
+        ],
+        "recommendations": [
+          "Document at least one technical problem",
+          "Document at least one technical solution",
+          "Document at least one technical effect",
+          "Good: Rich set of technical features documented"
+        ],
+        "errors": [],
+        "warnings": [
+          "KTF feature 1: Description is too short",
+          "KTF feature 2: Description is too short",
+          "KTF feature 3: Description is too short",
+          "KTF feature 4: Description is too short",
+          "KTF feature 5: Description is too short",
+          "KTF feature 6: Description is too short",
+          "Low coherence between problems, solutions, and effects"
+        ]
+      }
+    },
+    {
+      "check": "supportability",
+      "name": "B 支持性（权利要求←说明书）",
+      "passed": false,
+      "score": 0.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "claims_count": 6,
+        "supported_claims": 0,
+        "unsupported_claims": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_scores": {
+          "claim_1": 0.0,
+          "claim_2": 0.0,
+          "claim_3": 0.0,
+          "claim_4": 0.0,
+          "claim_5": 0.0,
+          "claim_6": 0.0
+        },
+        "missing_elements": [],
+        "recommendations": [
+          "Ensure all claims are adequately supported by specification",
+          "Add missing technical details to specification"
+        ],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "term_consistency",
+      "name": "C 术语一致性",
+      "passed": false,
+      "score": 0.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "total_terms": 11,
+        "consistent_terms": 0,
+        "inconsistent_terms": [
+          {
+            "term": "的所述技术还包括名称",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括技术",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括领域",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括背景",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括内容",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "必要的技术特征",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "名称",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "技术",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "领域",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "背景",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "内容",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          }
+        ],
+        "term_usage": {
+          "的所述技术还包括名称": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括技术": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括领域": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括背景": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括内容": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "必要的技术特征": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "名称": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "技术": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "领域": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "背景": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "内容": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          }
+        },
+        "recommendations": [
+          "Standardize terminology across all sections",
+          "Use consistent terms for the same concepts"
+        ],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "banned_words",
+      "name": "D 禁用词/绝对化表述",
+      "passed": true,
+      "score": 1.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "total_violations": 0,
+        "violations_by_category": {},
+        "violations_by_severity": {
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        },
+        "critical_violations": [],
+        "all_violations": [],
+        "recommendations": [
+          "Excellent: No banned words detected"
+        ],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "abstract_validation",
+      "name": "E 摘要规范",
+      "passed": true,
+      "score": 1.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "length": 80,
+        "has_title": true,
+        "has_technical_field": true,
+        "has_summary": true,
+        "missing_elements": [],
+        "length_issues": [],
+        "recommendations": [],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "background_leakage",
+      "name": "F 背景泄漏/模板化问题",
+      "passed": true,
+      "score": 1.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "background_length": 169,
+        "leakage_issues": [],
+        "overlap_scores": {
+          "invention_content": 0.0,
+          "embodiments": 0.0,
+          "claims": 0.0
+        },
+        "leaked_content": [],
+        "recommendations": [],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "claim_quality",
+      "name": "G 权利要求质量（结构/覆盖/风险）",
+      "passed": true,
+      "score": 1.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "issues": [],
+        "recommendations": [],
+        "summary": {
+          "claims_count": 6,
+          "independent_claims_count": 1,
+          "dependent_claims_count": 5,
+          "independent_feature_count": 1,
+          "total_feature_refs": 0,
+          "unsupported_feature_refs": 0,
+          "redundant_dependent_claims_count": 0,
+          "redundant_pairs": []
+        },
+        "errors": [],
+        "warnings": []
+      }
+    }
+  ],
+  "recommendations": [
+    "Document at least one technical problem",
+    "Document at least one technical solution",
+    "Document at least one technical effect",
+    "Good: Rich set of technical features documented",
+    "Ensure all claims are adequately supported by specification",
+    "Add missing technical details to specification",
+    "Standardize terminology across all sections",
+    "Use consistent terms for the same concepts",
+    "Excellent: No banned words detected"
+  ],
+  "kpis": {
+    "claims_count": 6,
+    "independent_claims_count": 1,
+    "avg_claim_length": 24.0,
+    "term_consistency_score": 0.0,
+    "independent_claim_feature_count": 1,
+    "avg_features_per_claim": 0.0,
+    "unsupported_feature_ratio": 0.0,
+    "redundant_claim_ratio": 0.0
+  },
+  "metadata": {
+    "kpis": {
+      "claims_count": 6,
+      "independent_claims_count": 1,
+      "avg_claim_length": 24.0,
+      "term_consistency_score": 0.0,
+      "independent_claim_feature_count": 1,
+      "avg_features_per_claim": 0.0,
+      "unsupported_feature_ratio": 0.0,
+      "redundant_claim_ratio": 0.0
+    }
+  },
+  "audit": {
+    "run_trace_id": "2a7edc59-b841-42a7-a67d-e2e7d4660fc7",
+    "document_version": 1,
+    "extraction": {
+      "source": "rules",
+      "fallback_reason": "llm_unavailable_or_invalid",
+      "trace_id": "43998cd8-7a98-4848-9edf-4ab631ec0cd8"
+    },
+    "generation": {
+      "claims": {
+        "source": "rules",
+        "trace_id": "26f6f051-0b41-40a1-978f-9974876244eb",
+        "llm": null,
+        "fallback_reason": "llm_unavailable_or_invalid"
+      },
+      "abstract": {
+        "source": "rules",
+        "trace_id": "e49185f8-e66b-49dd-8905-08f90d0a7373",
+        "llm": null,
+        "fallback_reason": "llm_unavailable_or_invalid"
+      }
+    },
+    "llm": null
+  }
+}

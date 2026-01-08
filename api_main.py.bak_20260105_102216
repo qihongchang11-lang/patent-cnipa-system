@@ -1,0 +1,939 @@
+"""
+CNIPA Patent System API
+FastAPI-based REST API for patent document processing
+"""
+
+from dotenv import load_dotenv
+load_dotenv()
+
+import logging
+import os
+import uuid
+import asyncio
+from datetime import datetime
+from typing import Dict, Optional, List
+from pathlib import Path
+
+if not logging.getLogger().handlers:
+    logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__name__)
+
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException, BackgroundTasks
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+import sys
+from pathlib import Path
+
+# Add src directory to Python path
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+
+# Import all required modules
+from core.patent_document import PatentDocument, MetaData, Specification, Claims, Abstract, Disclosure, PSEMatrix
+from core.pse_extractor import PSEExtractor
+from generators.four_piece_generator import FourPieceGenerator
+from orchestrator.pipeline_orchestrator import PipelineOrchestrator, ProcessingResult
+from exporters.docx_exporter import export_patent_docx
+from core.state_manager import StateManager, JobNotFoundError
+from utils.llm_client import LLMClient
+
+# Initialize FastAPI app
+app = FastAPI(
+    title="CNIPA Patent System API",
+    description="API for processing patent drafts and generating CNIPA-compliant documents",
+    version="1.0.0"
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize components
+pse_extractor = PSEExtractor()
+four_piece_generator = FourPieceGenerator()
+pipeline_orchestrator = PipelineOrchestrator()
+
+# Processing status storage
+processing_status: Dict[str, Dict] = {}
+
+# Results storage directory
+RESULTS_DIR = Path("results")
+RESULTS_DIR.mkdir(exist_ok=True)
+state_manager = StateManager(RESULTS_DIR)
+
+
+def _log_llm_startup_status() -> None:
+    disabled = (os.environ.get("LLM_DISABLED") or "").strip().lower() in {"1", "true", "yes"}
+    api_key = (os.environ.get("LLM_API_KEY") or "").strip()
+    base_url = (os.environ.get("LLM_BASE_URL") or "").strip()
+    model = (os.environ.get("LLM_MODEL") or "").strip()
+
+    logger.info(
+        "LLM_API_KEY present: %s | LLM_BASE_URL=%s | LLM_MODEL=%s",
+        "true" if bool(api_key) else "false",
+        base_url,
+        model,
+    )
+
+    enabled = bool((not disabled) and api_key and base_url and model)
+    provider = ""
+    if base_url:
+        provider = base_url.replace("https://", "").replace("http://", "").split("/")[0]
+
+    if enabled:
+        logger.info("LLM enabled: true | provider=%s | model=%s", provider or "openai-compatible", model)
+    else:
+        logger.warning(
+            "LLM enabled: false | provider=%s | model=%s | LLM disabled, falling back to rules",
+            provider or "openai-compatible",
+            model or "",
+        )
+
+
+_log_llm_startup_status()
+
+class ProcessingRequest(BaseModel):
+    """Request model for patent processing"""
+    title: str
+    technical_field: str
+    background: str
+    invention_content: str
+    embodiments: str
+    drawings_description: Optional[str] = None
+    enable_checks: bool = True
+
+class ProcessingStatus(BaseModel):
+    """Status model for processing job"""
+    job_id: str
+    status: str  # pending, processing, completed, failed
+    progress: int  # 0-100
+    message: str
+    result_path: Optional[str] = None
+    error: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class EditRequest(BaseModel):
+    section: str  # claims | abstract
+    target: str   # claim:1 or abstract
+    value: str
+    if_version: int
+
+
+class SuggestionRequest(BaseModel):
+    section: str
+    target: str
+    instruction: str
+    context: Optional[str] = None
+
+@app.get("/")
+async def root():
+    """Root endpoint with API information"""
+    return {
+        "message": "CNIPA Patent System API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "endpoints": {
+            "process_text": "POST /process/text",
+            "process_file": "POST /process/file",
+            "status": "GET /status/{job_id}",
+            "download": "GET /download/{job_id}",
+            "health": "GET /health"
+        }
+    }
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+@app.post("/process/text")
+async def process_text(
+    request: ProcessingRequest,
+    background_tasks: BackgroundTasks
+) -> Dict:
+    """Process patent text directly"""
+    job_id = str(uuid.uuid4())
+
+    # Initialize processing status
+    processing_status[job_id] = {
+        "job_id": job_id,
+        "status": "pending",
+        "progress": 0,
+        "message": "Job created",
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
+    }
+
+    # Start background processing
+    background_tasks.add_task(
+        process_patent_text_sync,
+        job_id,
+        request.model_dump()
+    )
+
+    return {"job_id": job_id, "status": "accepted"}
+
+@app.post("/process/file")
+async def process_file(
+    file: UploadFile = File(...),
+    title: str = Form(...),
+    technical_field: str = Form(...),
+    enable_checks: bool = Form(True),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+) -> Dict:
+    """Process uploaded patent draft file"""
+    job_id = str(uuid.uuid4())
+
+    # Validate file type
+    if not file.filename.endswith(('.txt', '.docx', '.md')):
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported file type. Use .txt, .docx, or .md"
+        )
+
+    # Initialize processing status
+    processing_status[job_id] = {
+        "job_id": job_id,
+        "status": "pending",
+        "progress": 0,
+        "message": "File uploaded successfully",
+        "created_at": datetime.now().isoformat(),
+        "updated_at": datetime.now().isoformat()
+    }
+
+    # Save uploaded file
+    upload_dir = RESULTS_DIR / "uploads"
+    upload_dir.mkdir(exist_ok=True)
+    file_path = upload_dir / f"{job_id}_{file.filename}"
+
+    try:
+        content = await file.read()
+        with open(file_path, 'wb') as f:
+            f.write(content)
+    except Exception as e:
+        processing_status[job_id]["status"] = "failed"
+        processing_status[job_id]["error"] = f"File save error: {str(e)}"
+        raise HTTPException(status_code=500, detail="Failed to save uploaded file")
+
+    # Start background processing
+    background_tasks.add_task(
+        process_patent_file_sync,
+        job_id,
+        str(file_path),
+        {
+            "title": title,
+            "technical_field": technical_field,
+            "enable_checks": bool(enable_checks),
+        }
+    )
+
+    return {"job_id": job_id, "status": "accepted", "filename": file.filename}
+
+@app.get("/status/{job_id}")
+async def get_status(job_id: str) -> Dict:
+    """Get processing status for a job"""
+    if job_id not in processing_status:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    return processing_status[job_id]
+
+@app.get("/download/{job_id}")
+async def download_results(job_id: str):
+    """Download processing results"""
+    if job_id not in processing_status:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    status = processing_status[job_id]
+    if status["status"] != "completed":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Job not completed. Current status: {status['status']}"
+        )
+
+    if not status.get("result_path"):
+        raise HTTPException(status_code=500, detail="Result path not available")
+
+    result_path = Path(status["result_path"])
+    if not result_path.exists():
+        raise HTTPException(status_code=404, detail="Result file not found")
+
+    return FileResponse(
+        result_path,
+        filename=f"patent_results_{job_id}.zip",
+        media_type="application/zip"
+    )
+
+@app.get("/jobs")
+async def list_jobs() -> List[Dict]:
+    """List all processing jobs"""
+    jobs = []
+    for job_id, status in processing_status.items():
+        job_data = {
+            "job_id": job_id,
+            "status": status["status"],
+            "progress": status["progress"],
+            "created_at": status["created_at"].isoformat() if hasattr(status["created_at"], 'isoformat') else status["created_at"],
+            "updated_at": status["updated_at"].isoformat() if hasattr(status["updated_at"], 'isoformat') else status["updated_at"]
+        }
+        jobs.append(job_data)
+
+    return sorted(jobs, key=lambda x: x["created_at"], reverse=True)
+
+
+@app.get("/jobs/{job_id}/document")
+async def get_job_document(job_id: str) -> Dict:
+    """Load persisted PatentDocument for a job."""
+    try:
+        doc = state_manager.load(job_id)
+    except JobNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return {"document_version": int(doc.document_version), "document": model_to_dict(doc)}
+
+
+@app.patch("/jobs/{job_id}/edit")
+async def edit_job_document(job_id: str, req: EditRequest) -> Dict:
+    """
+    Whitelisted edits only:
+    - section=claims target=claim:<n>
+    - section=abstract target=abstract
+    Uses optimistic locking via if_version.
+    """
+    try:
+        doc = state_manager.load(job_id)
+    except JobNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    if req.section not in {"claims", "abstract"}:
+        raise HTTPException(status_code=400, detail="Invalid section")
+
+    if int(req.if_version) != int(doc.document_version):
+        return JSONResponse(
+            status_code=409,
+            content={"detail": "Version conflict", "document_version": int(doc.document_version)},
+        )
+
+    before_text = ""
+    after_text = (req.value or "").strip()
+
+    if req.section == "abstract":
+        if req.target != "abstract":
+            raise HTTPException(status_code=400, detail="Invalid target for abstract")
+        if not doc.abstract:
+            raise HTTPException(status_code=400, detail="Abstract missing")
+        before_text = (doc.abstract.summary or "").strip()
+        doc.abstract.summary = after_text
+        doc.abstract.content = _render_abstract_content(doc)
+
+    if req.section == "claims":
+        if not req.target.startswith("claim:"):
+            raise HTTPException(status_code=400, detail="Invalid target for claims")
+        try:
+            claim_no = int(req.target.split(":", 1)[1])
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid claim number")
+        if not doc.claims:
+            raise HTTPException(status_code=400, detail="Claims missing")
+
+        # independent claim
+        updated = False
+        if doc.claims.independent_claims:
+            ic = doc.claims.independent_claims[0]
+            if int(ic.claim_number) == claim_no:
+                before_text = " ".join([x for x in [(ic.preamble or "").strip(), (ic.transition or "").strip(), (ic.body or "").strip()] if x]).strip()
+                ic.preamble = after_text
+                ic.transition = ""
+                ic.body = ""
+                updated = True
+
+        if not updated and doc.claims.dependent_claims:
+            for dc in doc.claims.dependent_claims:
+                if int(dc.claim_number) == claim_no:
+                    before_text = (dc.additional_features or "").strip()
+                    dc.additional_features = after_text
+                    updated = True
+                    break
+
+        if not updated:
+            raise HTTPException(status_code=400, detail="Target claim not found")
+
+        doc.claims.content = _render_claims_content(doc)
+
+    # record event then persist
+    event = {
+        "timestamp": StateManager.now_iso(),
+        "actor": "human_edit",
+        "section": req.section,
+        "target": req.target,
+        "before_hash": StateManager.sha256_text(before_text),
+        "after_hash": StateManager.sha256_text(after_text),
+        "reason": "human_edit",
+        "trace_id": None,
+    }
+    state_manager.append_edit_event(job_id, event)
+    state_manager.save(job_id, doc)
+
+    return {"document_version": int(doc.document_version), "document": model_to_dict(doc)}
+
+
+@app.post("/jobs/{job_id}/recheck")
+async def recheck_job(job_id: str) -> Dict:
+    """
+    Re-run checkers only on the current persisted PatentDocument (no regeneration).
+    Always returns a report (soft fail).
+    """
+    try:
+        doc = state_manager.load(job_id)
+    except JobNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    result = pipeline_orchestrator.check_only(doc)
+    report = build_quality_report(result)
+    report["metadata"] = convert_datetime_to_string(getattr(result, "metadata", {}) or {})
+
+    run_trace_id = str(uuid.uuid4())
+    report["audit"] = build_audit(doc, run_trace_id)
+    report["document_version"] = int(doc.document_version)
+
+    summary = state_manager.get_edit_summary(job_id)
+    report["edit_event_summary"] = {
+        "counts_by_actor": summary.counts_by_actor,
+        "total": int(sum(summary.counts_by_actor.values())),
+    }
+    if summary.last_event:
+        report["audit"]["last_edit"] = {
+            "actor": summary.last_event.get("actor"),
+            "timestamp": summary.last_event.get("timestamp"),
+            "section": summary.last_event.get("section"),
+            "target": summary.last_event.get("target"),
+        }
+
+    # Persist latest report/zip (updates docs/docx to reflect current state)
+    try:
+        save_results(job_id, report, doc)
+    except Exception:
+        # Ensure at least quality_report.json is persisted
+        job_dir = RESULTS_DIR / job_id
+        job_dir.mkdir(exist_ok=True)
+        (job_dir / "quality_report.json").write_text(
+            json.dumps(convert_datetime_to_string(report), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    return report
+
+
+@app.post("/jobs/{job_id}/refine_suggestion")
+async def refine_suggestion(job_id: str, req: SuggestionRequest) -> Dict:
+    """
+    Generate a suggestion (LLM) but do not apply it.
+    Records an edit event with actor=llm_suggestion (on success only).
+    """
+    try:
+        doc = state_manager.load(job_id)
+    except JobNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    section = req.section
+    target = req.target
+    if section not in {"claims", "abstract"}:
+        raise HTTPException(status_code=400, detail="Invalid section")
+
+    current_text = ""
+    if section == "abstract":
+        if target != "abstract" or not doc.abstract:
+            raise HTTPException(status_code=400, detail="Invalid target")
+        current_text = (doc.abstract.summary or "").strip()
+    else:
+        if not target.startswith("claim:") or not doc.claims:
+            raise HTTPException(status_code=400, detail="Invalid target")
+        try:
+            n = int(target.split(":", 1)[1])
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid claim number")
+        if doc.claims.independent_claims and int(doc.claims.independent_claims[0].claim_number) == n:
+            ic = doc.claims.independent_claims[0]
+            current_text = " ".join([x for x in [(ic.preamble or "").strip(), (ic.transition or "").strip(), (ic.body or "").strip()] if x]).strip()
+        else:
+            found = False
+            for dc in doc.claims.dependent_claims or []:
+                if int(dc.claim_number) == n:
+                    current_text = (dc.additional_features or "").strip()
+                    found = True
+                    break
+            if not found:
+                raise HTTPException(status_code=400, detail="Target claim not found")
+
+    llm = LLMClient()
+    prompt = (
+        "你是一名严谨的中国专利代理师。请仅输出改写后的文本，不要输出任何解释。\n"
+        "要求：\n"
+        "- 保持法律表达严谨\n"
+        "- 避免绝对化/夸大/主观/商业用语\n"
+        "- 不引入不必要的限定\n\n"
+        f"原文：\n{current_text}\n\n"
+        f"改写指令：{req.instruction}\n\n"
+        f"额外上下文：{req.context or ''}\n"
+    )
+    suggested = llm.generate_text(prompt, retries=1)
+    meta = llm.get_last_meta()
+    model_meta = llm.get_config_meta()
+
+    if suggested:
+        event = {
+            "timestamp": StateManager.now_iso(),
+            "actor": "llm_suggestion",
+            "section": section,
+            "target": target,
+            "before_hash": StateManager.sha256_text(current_text),
+            "after_hash": StateManager.sha256_text(suggested),
+            "reason": req.instruction,
+            "trace_id": getattr(meta, "trace_id", None),
+        }
+        state_manager.append_edit_event(job_id, event)
+
+    return {
+        "suggested_text": suggested,
+        "trace_id": getattr(meta, "trace_id", None),
+        "model_meta": model_meta,
+    }
+
+def convert_datetime_to_string(data):
+    """Convert datetime objects to ISO format strings recursively"""
+    if isinstance(data, dict):
+        return {k: convert_datetime_to_string(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [convert_datetime_to_string(item) for item in data]
+    elif hasattr(data, 'isoformat'):
+        return data.isoformat()
+    else:
+        return data
+
+# ---- serialization helpers ----
+def result_to_dict(r) -> dict:
+    return {
+        "success": bool(getattr(r, "success", False)),
+        "quality_score": float(getattr(r, "quality_score", 0.0)),
+        "check_results": getattr(r, "check_results", {}) or {},
+        "errors": getattr(r, "errors", []) or [],
+        "warnings": getattr(r, "warnings", []) or [],
+        "processing_time": float(getattr(r, "processing_time", 0.0)),
+    }
+
+def build_quality_report(r: ProcessingResult) -> dict:
+    """
+    Produce a more product-friendly quality report:
+    - normalized per-check result list
+    - aggregated recommendations (deduplicated)
+    """
+    base = result_to_dict(r)
+    check_results = base.get("check_results", {}) or {}
+
+    checks = []
+    aggregated_recommendations: List[str] = []
+
+    display_names = {
+        "ktf_completeness": "A 技术完整性（KTF）",
+        "supportability": "B 支持性（权利要求←说明书）",
+        "term_consistency": "C 术语一致性",
+        "banned_words": "D 禁用词/绝对化表述",
+        "abstract_validation": "E 摘要规范",
+        "background_leakage": "F 背景泄漏/模板化问题",
+        "claim_quality": "G 权利要求质量（结构/覆盖/风险）",
+    }
+
+    for check_name, cr in check_results.items():
+        details = (cr or {}).get("details", {}) or {}
+        recs = details.get("recommendations", []) or []
+        if isinstance(recs, list):
+            aggregated_recommendations.extend([str(x) for x in recs if str(x).strip()])
+
+        checks.append(
+            {
+                "check": check_name,
+                "name": display_names.get(check_name, check_name),
+                "passed": bool((cr or {}).get("passed", False)),
+                "score": float((cr or {}).get("score", 0.0) or 0.0),
+                "errors": (cr or {}).get("errors", []) or [],
+                "warnings": (cr or {}).get("warnings", []) or [],
+                "issues": ((cr or {}).get("details", {}) or {}).get("issues", []) or [],
+                "details": details,
+            }
+        )
+
+    # de-dup while preserving order
+    seen = set()
+    recommendations: List[str] = []
+    for rec in aggregated_recommendations:
+        if rec not in seen:
+            seen.add(rec)
+            recommendations.append(rec)
+
+    kpis = {}
+    try:
+        kpis = (getattr(r, "metadata", {}) or {}).get("kpis", {}) or {}
+    except Exception:
+        kpis = {}
+
+    return {
+        **base,
+        "checks": checks,
+        "recommendations": recommendations,
+        "kpis": kpis,
+    }
+
+def build_audit(patent_doc: PatentDocument, run_trace_id: str) -> dict:
+    extraction_audit = {}
+    if getattr(patent_doc, "pse_matrix", None) and getattr(patent_doc.pse_matrix, "audit", None):
+        extraction_audit = patent_doc.pse_matrix.audit or {}
+
+    generation_audit = getattr(patent_doc, "audit", {}) or {}
+    generation_section = (generation_audit.get("generation") or {}) if isinstance(generation_audit, dict) else {}
+
+    return {
+        "run_trace_id": run_trace_id,
+        "document_version": int(getattr(patent_doc, "document_version", 1) or 1),
+        "extraction": {
+            "source": extraction_audit.get("extraction_source", "rules"),
+            "fallback_reason": extraction_audit.get("fallback_reason"),
+            "trace_id": extraction_audit.get("trace_id"),
+        },
+        "generation": {
+            "claims": generation_section.get("claims", {}),
+            "abstract": generation_section.get("abstract", {}),
+        },
+        "llm": extraction_audit.get("llm") or None,
+    }
+
+def _render_claims_content(patent_doc: PatentDocument) -> str:
+    lines = ["权利要求书", ""]
+    if patent_doc.claims and patent_doc.claims.independent_claims:
+        c = patent_doc.claims.independent_claims[0]
+        text = " ".join([x for x in [(c.preamble or "").strip(), (c.transition or "").strip(), (c.body or "").strip()] if x]).strip()
+        lines.append(f"权利要求{c.claim_number}：")
+        lines.append(text)
+        lines.append("")
+    if patent_doc.claims and patent_doc.claims.dependent_claims:
+        for d in patent_doc.claims.dependent_claims:
+            lines.append(f"权利要求{d.claim_number}：")
+            if (d.additional_features or "").strip().startswith("根据权利要求"):
+                lines.append((d.additional_features or "").strip())
+            else:
+                lines.append(f"根据权利要求{d.parent_claim}所述的{(d.additional_features or '').strip()}。")
+            lines.append("")
+    return "\n".join(lines).strip() + "\n"
+
+def _render_abstract_content(patent_doc: PatentDocument) -> str:
+    if not patent_doc.abstract:
+        return ""
+    a = patent_doc.abstract
+    return f"""摘要
+
+发明名称：{a.title}
+技术领域：{a.technical_field}
+
+{(a.summary or '').strip()}
+"""
+
+def model_to_dict(m) -> dict:
+    # 统一用 Pydantic v2 的序列化，确保结果可 JSON 序列化（datetime→isoformat 等）
+    return m.model_dump(by_alias=False, mode="json")
+
+# Background processing functions
+def process_patent_text_sync(job_id: str, request_data: Dict):
+    """Process patent text in background"""
+    try:
+        run_trace_id = str(uuid.uuid4())
+        # Update status
+        processing_status[job_id].update({
+            "status": "processing",
+            "progress": 10,
+            "message": "Extracting PSE matrix...",
+            "updated_at": datetime.now().isoformat()
+        })
+
+        # Create patent draft text
+        draft_text = f"""
+        发明名称：{request_data['title']}
+        技术领域：{request_data['technical_field']}
+        背景技术：{request_data['background']}
+        发明内容：{request_data['invention_content']}
+        具体实施方式：{request_data['embodiments']}
+        """
+
+        if request_data.get('drawings_description'):
+            draft_text += f"附图说明：{request_data['drawings_description']}"
+
+        # Extract PSE matrix
+        pse_matrix = pse_extractor.extract_from_text(draft_text)
+
+        processing_status[job_id].update({
+            "progress": 30,
+            "message": "Generating patent documents...",
+            "updated_at": datetime.now().isoformat()
+        })
+
+        # Generate four-piece documents
+        patent_doc = four_piece_generator.generate_all(
+            title=request_data['title'],
+            technical_field=request_data['technical_field'],
+            background=request_data['background'],
+            invention_content=request_data['invention_content'],
+            embodiments=request_data['embodiments'],
+            pse_matrix=pse_matrix
+        )
+
+        processing_status[job_id].update({
+            "progress": 60,
+            "message": "Running quality checks...",
+            "updated_at": datetime.now().isoformat()
+        })
+
+        # Run pipeline orchestrator for quality checks (synchronously)
+        result = pipeline_orchestrator.process_patent(
+            patent_doc,
+            enable_checks=bool(request_data.get("enable_checks", True))
+        )
+
+        processing_status[job_id].update({
+            "progress": 90,
+            "message": "Preparing results...",
+            "updated_at": datetime.now().isoformat()
+        })
+
+        # Build product report (JSON-serializable)
+        result_dict = build_quality_report(result)
+        result_dict["metadata"] = convert_datetime_to_string(getattr(result, "metadata", {}) or {})
+        result_dict["audit"] = build_audit(patent_doc, run_trace_id)
+
+        # Save results (best-effort; must not prevent output)
+        try:
+            result_path = save_results(job_id, result_dict, patent_doc)
+        except Exception as e:
+            # fallback: write a minimal quality report for auditability
+            job_dir = RESULTS_DIR / job_id
+            job_dir.mkdir(exist_ok=True)
+            fallback_report = job_dir / "quality_report.json"
+            import json as _json
+            with open(fallback_report, "w", encoding="utf-8") as f:
+                _json.dump(convert_datetime_to_string(result_dict), f, ensure_ascii=False, indent=2)
+            result_path = fallback_report
+
+        # Update final status
+        processing_status[job_id].update({
+            "status": "completed",
+            "progress": 100,
+            "message": f"Processing completed successfully. Quality score: {getattr(result, 'quality_score', 0.0):.2f}",
+            "result_path": str(result_path),
+            "updated_at": datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        processing_status[job_id].update({
+            "status": "failed",
+            "progress": 0,
+            "message": f"Processing failed: {str(e)}",
+            "error": str(e),
+            "updated_at": datetime.now().isoformat()
+        })
+
+def process_patent_file_sync(job_id: str, file_path: str, metadata: Dict):
+    """Process uploaded patent file in background"""
+    try:
+        run_trace_id = str(uuid.uuid4())
+        # Read file content (txt/md as utf-8; docx via python-docx)
+        file_ext = Path(file_path).suffix.lower()
+        if file_ext == ".docx":
+            from docx import Document
+            doc = Document(file_path)
+            content = "\n".join(p.text for p in doc.paragraphs if p.text)
+        else:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+
+        # Update status
+        processing_status[job_id].update({
+            "status": "processing",
+            "progress": 10,
+            "message": "Reading and parsing file...",
+            "updated_at": datetime.now().isoformat()
+        })
+
+        # Extract PSE matrix from content
+        pse_matrix = pse_extractor.extract_from_text(content)
+
+        processing_status[job_id].update({
+            "progress": 30,
+            "message": "Generating patent documents...",
+            "updated_at": datetime.now().isoformat()
+        })
+
+        # Parse content to extract sections (simplified)
+        # In a real implementation, you'd have more sophisticated parsing
+        sections = parse_patent_content(content)
+
+        # Generate four-piece documents
+        patent_doc = four_piece_generator.generate_all(
+            title=metadata['title'],
+            technical_field=metadata['technical_field'],
+            background=sections.get('background', ''),
+            invention_content=sections.get('invention_content', ''),
+            embodiments=sections.get('embodiments', ''),
+            pse_matrix=pse_matrix
+        )
+
+        processing_status[job_id].update({
+            "progress": 60,
+            "message": "Running quality checks...",
+            "updated_at": datetime.now().isoformat()
+        })
+
+        # Run pipeline orchestrator (synchronously)
+        result = pipeline_orchestrator.process_patent(
+            patent_doc,
+            enable_checks=bool(metadata.get("enable_checks", True))
+        )
+
+        processing_status[job_id].update({
+            "progress": 90,
+            "message": "Preparing results...",
+            "updated_at": datetime.now().isoformat()
+        })
+
+        # Build product report (JSON-serializable)
+        result_dict = build_quality_report(result)
+        result_dict["metadata"] = convert_datetime_to_string(getattr(result, "metadata", {}) or {})
+        result_dict["audit"] = build_audit(patent_doc, run_trace_id)
+
+        # Save results (best-effort; must not prevent output)
+        try:
+            result_path = save_results(job_id, result_dict, patent_doc)
+        except Exception as e:
+            job_dir = RESULTS_DIR / job_id
+            job_dir.mkdir(exist_ok=True)
+            fallback_report = job_dir / "quality_report.json"
+            import json as _json
+            with open(fallback_report, "w", encoding="utf-8") as f:
+                _json.dump(convert_datetime_to_string(result_dict), f, ensure_ascii=False, indent=2)
+            result_path = fallback_report
+
+        # Update final status
+        processing_status[job_id].update({
+            "status": "completed",
+            "progress": 100,
+            "message": f"Processing completed successfully. Quality score: {getattr(result, 'quality_score', 0.0):.2f}",
+            "result_path": str(result_path),
+            "updated_at": datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        processing_status[job_id].update({
+            "status": "failed",
+            "progress": 0,
+            "message": f"Processing failed: {str(e)}",
+            "error": str(e),
+            "updated_at": datetime.now().isoformat()
+        })
+
+def parse_patent_content(content: str) -> Dict[str, str]:
+    """Parse patent content to extract sections"""
+    # Simplified parsing - in real implementation, use more sophisticated methods
+    sections = {}
+
+    # Look for common section headers
+    lines = content.split('\n')
+    current_section = None
+    current_content = []
+
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+
+        # Check for section headers
+        if any(keyword in line for keyword in ['背景技术', '背景', 'Background']):
+            if current_section and current_content:
+                sections[current_section] = '\n'.join(current_content)
+            current_section = 'background'
+            current_content = []
+        elif any(keyword in line for keyword in ['发明内容', '发明', 'Invention']):
+            if current_section and current_content:
+                sections[current_section] = '\n'.join(current_content)
+            current_section = 'invention_content'
+            current_content = []
+        elif any(keyword in line for keyword in ['具体实施', '实施例', 'Embodiments']):
+            if current_section and current_content:
+                sections[current_section] = '\n'.join(current_content)
+            current_section = 'embodiments'
+            current_content = []
+        else:
+            if current_section:
+                current_content.append(line)
+
+    # Save last section
+    if current_section and current_content:
+        sections[current_section] = '\n'.join(current_content)
+
+    return sections
+
+def save_results(job_id: str, result: Dict, patent_doc: PatentDocument) -> Path:
+    """Save processing results to files"""
+    import json
+    import zipfile
+
+    # Create job directory
+    job_dir = RESULTS_DIR / job_id
+    job_dir.mkdir(exist_ok=True)
+
+    # Save individual documents
+    documents = {
+        "specification.md": patent_doc.specification.content if patent_doc.specification else "",
+        "claims.md": patent_doc.claims.content if patent_doc.claims else "",
+        "abstract.md": patent_doc.abstract.content if patent_doc.abstract else "",
+        "disclosure.md": patent_doc.disclosure.content if patent_doc.disclosure else ""
+    }
+
+    for filename, content in documents.items():
+        file_path = job_dir / filename
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+    # Markdown preview (single combined doc)
+    preview_md_path = job_dir / "preview.md"
+    with open(preview_md_path, "w", encoding="utf-8") as f:
+        f.write(patent_doc.to_markdown())
+
+    # Deliverable DOCX
+    docx_path = job_dir / "patent.docx"
+    export_patent_docx(patent_doc, docx_path)
+
+    # Save quality check results
+    result_path = job_dir / "quality_report.json"
+    with open(result_path, 'w', encoding='utf-8') as f:
+        json.dump(convert_datetime_to_string(result), f, ensure_ascii=False, indent=2)
+
+    # Save patent document metadata
+    metadata_path = job_dir / "patent_metadata.json"
+    with open(metadata_path, 'w', encoding='utf-8') as f:
+        json.dump(model_to_dict(patent_doc), f, ensure_ascii=False, indent=2)
+
+    # Create zip archive
+    zip_path = RESULTS_DIR / f"{job_id}_results.zip"
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for file_path in job_dir.glob("*"):
+            if file_path.is_file():
+                zf.write(file_path, file_path.name)
+
+    return zip_path
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

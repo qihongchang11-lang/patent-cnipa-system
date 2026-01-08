@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cnipa.gov.schemas/job-card-v1.0.json",
+  "title": "CNIPA Job Card Schema",
+  "description": "Schema for job cards used in patent processing workflows",
+  "type": "object",
+  "required": ["id", "name", "version", "steps"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique identifier for the job card"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 100,
+      "description": "Human-readable name of the job card"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Detailed description of the job card purpose"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Version number in semantic versioning format"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp"
+    },
+    "modified": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last modification timestamp"
+    },
+    "author": {
+      "type": "string",
+      "description": "Author or creator of the job card"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["workflow", "checklist", "validation", "examination"],
+      "description": "Type of job card"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["patent-processing", "quality-control", "examination", "administration"],
+      "description": "Category of the job card"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/step"
+      },
+      "description": "Steps in the workflow"
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Global parameters for the job card"
+    },
+    "errorHandling": {
+      "$ref": "#/$defs/errorHandling"
+    },
+    "performance": {
+      "$ref": "#/$defs/performance"
+    },
+    "monitoring": {
+      "$ref": "#/$defs/monitoring"
+    }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["id", "name", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 100
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "input-handler",
+            "validation",
+            "quality-gate",
+            "examination",
+            "review",
+            "document-generation",
+            "waiting",
+            "decision",
+            "archival"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "parameters": {
+          "type": "object",
+          "description": "Step-specific parameters"
+        },
+        "next": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Next steps in the workflow"
+        },
+        "condition": {
+          "type": "string",
+          "description": "Conditional logic for step execution"
+        },
+        "timeout": {
+          "type": "string",
+          "pattern": "^\\d+[hdwm]$",
+          "description": "Timeout in hours, days, weeks, or months"
+        }
+      }
+    },
+    "errorHandling": {
+      "type": "object",
+      "properties": {
+        "retryPolicy": {
+          "$ref": "#/$defs/retryPolicy"
+        },
+        "escalation": {
+          "$ref": "#/$defs/escalation"
+        },
+        "notifications": {
+          "$ref": "#/$defs/notifications"
+        }
+      }
+    },
+    "retryPolicy": {
+      "type": "object",
+      "properties": {
+        "maxRetries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 3
+        },
+        "retryDelay": {
+          "type": "string",
+          "enum": ["fixed", "exponential", "linear"],
+          "default": "exponential"
+        },
+        "backoffMultiplier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "maxDelay": {
+          "type": "integer",
+          "description": "Maximum delay in seconds"
+        }
+      }
+    },
+    "escalation": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "escalationLevels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["supervisor", "manager", "director", "admin"]
+          }
+        }
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "boolean",
+          "default": true
+        },
+        "slack": {
+          "type": "boolean",
+          "default": false
+        },
+        "webhook": {
+          "type": "boolean",
+          "default": false"
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "properties": {
+        "timeout": {
+          "type": "string",
+          "pattern": "^\\d+[hdw]$",
+          "description": "Overall timeout in hours, days, or weeks"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "normal", "high", "critical"]
+        },
+        "parallelProcessing": {
+          "type": "boolean",
+          "default": true
+        },
+        "maxConcurrentSteps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      }
+    },
+    "monitoring": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["duration", "success-rate", "error-count", "step-count"]
+          }
+        },
+        "alerts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/alert"
+          }
+        }
+      }
+    },
+    "alert": {
+      "type": "object",
+      "properties": {
+        "condition": {
+          "type": "string",
+          "enum": ["failure", "step-failure", "timeout", "sla-breach"]
+        },
+        "threshold": {
+          "oneOf": [
+            { "type": "integer" },
+            { "type": "string", "pattern": "^\\d+[hdw]$" }
+          ]
+        },
+        "action": {
+          "type": "string",
+          "enum": ["notify", "escalate", "suspend"]
+        }
+      }
+    }
+  }
+}

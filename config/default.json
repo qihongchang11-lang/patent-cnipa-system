@@ -1,0 +1,177 @@
+{
+  "system": {
+    "name": "CNIPA Patent System",
+    "version": "1.0.0",
+    "environment": "development"
+  },
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+    "cors": {
+      "enabled": true,
+      "origins": ["http://localhost:3000", "http://localhost:8080"]
+    }
+  },
+  "database": {
+    "type": "postgresql",
+    "host": "localhost",
+    "port": 5432,
+    "name": "cnipa_patents",
+    "user": "patent_user",
+    "password": "secure_password",
+    "ssl": false,
+    "pool": {
+      "min": 2,
+      "max": 10
+    }
+  },
+  "redis": {
+    "url": "redis://localhost:6379",
+    "db": 0,
+    "keyPrefix": "cnipa:"
+  },
+  "storage": {
+    "type": "local",
+    "local_path": "./data",
+    "allowedFormats": ["json", "xml", "yaml", "docx", "pdf"],
+    "maxFileSize": "50MB"
+  },
+  "logging": {
+    "level": "info",
+    "format": "json",
+    "outputs": {
+      "console": true,
+      "file": {
+        "enabled": true,
+        "directory": "./logs",
+        "maxFiles": 10,
+        "maxSize": "10MB"
+      }
+    }
+  },
+  "validation": {
+    "strictMode": true,
+    "enableSchemaValidation": true,
+    "enableBusinessRuleValidation": true,
+    "enableCnipaValidation": true,
+    "maxValidationErrors": 100
+  },
+  "orchestrator": {
+    "defaultJobCard": "patent-application-processing",
+    "monitoringEnabled": true,
+    "parallelProcessing": true,
+    "maxConcurrentProcessing": 5,
+    "retryPolicy": {
+      "maxRetries": 3,
+      "retryDelay": "exponential",
+      "backoffMultiplier": 2,
+      "maxDelay": "5m"
+    },
+    "timeout": {
+      "overall": "24h",
+      "validation": "10s",
+      "examination": "2h",
+      "documentGeneration": "5m"
+    }
+  },
+  "jobCards": {
+    "directory": "./jobcards",
+    "autoReload": true,
+    "validationRequired": true
+  },
+  "schemas": {
+    "directory": "./schema",
+    "validateJobCards": true,
+    "validateApplications": true
+  },
+  "documents": {
+    "outputDirectory": "./output",
+    "templatesDirectory": "./templates",
+    "formats": ["pdf", "docx", "xml"],
+    "multilingual": true,
+    "supportedLanguages": ["zh-CN", "en"],
+    "digitalSignature": {
+      "enabled": false,
+      "certificatePath": "",
+      "provider": "openssl"
+    }
+  },
+  "examination": {
+    "priorArtDatabases": ["CNIPA", "WIPO", "EPO", "USPTO"],
+    "classificationSystems": ["IPC", "CPC", "FI"],
+    "searchAlgorithms": {
+      "similarity": {
+        "enabled": true,
+        "threshold": 0.85
+      },
+      "semantic": {
+        "enabled": true,
+        "model": "bert-large"
+      }
+    },
+    "thresholds": {
+      "novelty": 0.95,
+      "inventiveStep": 0.80,
+      "similarity": 0.70
+    }
+  },
+  "security": {
+    "enableAuditLog": true,
+    "enableInputValidation": true,
+    "enableRateLimiting": true,
+    "rateLimit": {
+      "windowMs": 900000, // 15 minutes
+      "max": 100 // requests per window
+    },
+    "allowedFileTypes": [
+      ".json", ".xml", ".yaml", ".yml", ".docx", ".pdf",
+      ".jpg", ".jpeg", ".png", ".gif", ".svg"
+    ]
+  },
+  "notifications": {
+    "email": {
+      "enabled": true,
+      "smtp": {
+        "host": "smtp.example.com",
+        "port": 587,
+        "secure": true,
+        "auth": {
+          "user": "notifications@example.com",
+          "pass": "password"
+        }
+      }
+    },
+    "slack": {
+      "enabled": false,
+      "webhookUrl": "",
+      "channel": "#patents"
+    },
+    "webhook": {
+      "enabled": false,
+      "url": "",
+      "secret": ""
+    }
+  },
+  "monitoring": {
+    "metrics": {
+      "enabled": true,
+      "collector": "prometheus",
+      "namespace": "cnipa_patents"
+    },
+    "healthCheck": {
+      "enabled": true,
+      "interval": "30s",
+      "timeout": "5s"
+    },
+    "alerting": {
+      "enabled": true,
+      "thresholds": {
+        "errorRate": 0.05, // 5% error rate
+        "responseTime": 5000, // 5 seconds
+        "queueSize": 100,
+        "memoryUsage": 0.80, // 80% of available memory
+        "diskUsage": 0.85 // 85% disk usage
+      }
+    }
+  }
+}

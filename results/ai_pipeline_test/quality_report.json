@@ -1,0 +1,1116 @@
+{
+  "success": false,
+  "quality_score": 0.5115384615384615,
+  "check_results": {
+    "ktf_completeness": {
+      "passed": false,
+      "score": 1.0,
+      "details": {
+        "ktf_features_count": 20,
+        "problems_count": 3,
+        "solutions_count": 3,
+        "effects_count": 1,
+        "missing_elements": [],
+        "recommendations": [
+          "Good: Rich set of technical features documented"
+        ],
+        "errors": [],
+        "warnings": [
+          "KTF feature 5: Description is too short",
+          "KTF feature 6: Description is too short",
+          "KTF feature 7: Description is too short",
+          "KTF feature 8: Description is too short",
+          "KTF feature 9: Description is too short",
+          "KTF feature 10: Description is too short",
+          "KTF feature 11: Description is too short",
+          "KTF feature 12: Description is too short",
+          "KTF feature 13: Description is too short",
+          "KTF feature 14: Description is too short",
+          "KTF feature 15: Description is too short",
+          "KTF feature 16: Description is too short",
+          "KTF feature 17: Description is too short",
+          "KTF feature 18: Description is too short",
+          "KTF feature 19: Description is too short",
+          "KTF feature 20: Description is too short",
+          "Low coherence between problems, solutions, and effects"
+        ]
+      },
+      "errors": [],
+      "warnings": [
+        "KTF feature 5: Description is too short",
+        "KTF feature 6: Description is too short",
+        "KTF feature 7: Description is too short",
+        "KTF feature 8: Description is too short",
+        "KTF feature 9: Description is too short",
+        "KTF feature 10: Description is too short",
+        "KTF feature 11: Description is too short",
+        "KTF feature 12: Description is too short",
+        "KTF feature 13: Description is too short",
+        "KTF feature 14: Description is too short",
+        "KTF feature 15: Description is too short",
+        "KTF feature 16: Description is too short",
+        "KTF feature 17: Description is too short",
+        "KTF feature 18: Description is too short",
+        "KTF feature 19: Description is too short",
+        "KTF feature 20: Description is too short",
+        "Low coherence between problems, solutions, and effects"
+      ]
+    },
+    "supportability": {
+      "passed": false,
+      "score": 0.0,
+      "details": {
+        "claims_count": 6,
+        "supported_claims": 0,
+        "unsupported_claims": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_scores": {
+          "claim_1": 0.25,
+          "claim_2": 0.0,
+          "claim_3": 0.0,
+          "claim_4": 0.0,
+          "claim_5": 0.0,
+          "claim_6": 0.0
+        },
+        "missing_elements": [],
+        "recommendations": [
+          "Ensure all claims are adequately supported by specification",
+          "Add missing technical details to specification"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "term_consistency": {
+      "passed": false,
+      "score": 0.07692307692307693,
+      "details": {
+        "total_terms": 13,
+        "consistent_terms": 1,
+        "inconsistent_terms": [
+          {
+            "term": "的所述技术还包括名称",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括专利",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括系统",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括技术",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括领域",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "大模型进行结构化抽取",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "。 发明内容： 为解决上述问题",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "名称",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "专利",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "系统",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "技术",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "领域",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          }
+        ],
+        "term_usage": {
+          "：文本解析模块": {
+            "specification": 1,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 2
+          },
+          "的所述技术还包括名称": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括专利": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括系统": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括技术": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括领域": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "大模型进行结构化抽取": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "。 发明内容： 为解决上述问题": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "名称": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "专利": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "系统": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "技术": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "领域": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          }
+        },
+        "recommendations": [
+          "Standardize terminology across all sections",
+          "Use consistent terms for the same concepts"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "banned_words": {
+      "passed": false,
+      "score": 0.0,
+      "details": {
+        "total_violations": 6,
+        "violations_by_category": {
+          "absolute_terms": [
+            {
+              "word": "绝对",
+              "position": 441,
+              "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+              "category": "absolute_terms",
+              "severity": "high",
+              "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+            },
+            {
+              "word": "绝对",
+              "position": 1434,
+              "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+              "category": "absolute_terms",
+              "severity": "high",
+              "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+            },
+            {
+              "word": "绝对",
+              "position": 2411,
+              "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。 发明内容：\n为解",
+              "category": "absolute_terms",
+              "severity": "high",
+              "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+            }
+          ],
+          "subjective_terms": [
+            {
+              "word": "容易",
+              "position": 437,
+              "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内",
+              "category": "subjective_terms",
+              "severity": "medium",
+              "reason": "Subjective terms are not objectively measurable"
+            },
+            {
+              "word": "容易",
+              "position": 1430,
+              "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内",
+              "category": "subjective_terms",
+              "severity": "medium",
+              "reason": "Subjective terms are not objectively measurable"
+            },
+            {
+              "word": "容易",
+              "position": 2407,
+              "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。 发明内容",
+              "category": "subjective_terms",
+              "severity": "medium",
+              "reason": "Subjective terms are not objectively measurable"
+            }
+          ]
+        },
+        "violations_by_severity": {
+          "high": 3,
+          "medium": 3,
+          "low": 0
+        },
+        "critical_violations": [
+          {
+            "word": "绝对",
+            "position": 441,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "绝对",
+            "position": 1434,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "绝对",
+            "position": 2411,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。 发明内容：\n为解",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          }
+        ],
+        "all_violations": [
+          {
+            "word": "绝对",
+            "position": 441,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "绝对",
+            "position": 1434,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "绝对",
+            "position": 2411,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。 发明内容：\n为解",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "容易",
+            "position": 437,
+            "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内",
+            "category": "subjective_terms",
+            "severity": "medium",
+            "reason": "Subjective terms are not objectively measurable"
+          },
+          {
+            "word": "容易",
+            "position": 1430,
+            "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内",
+            "category": "subjective_terms",
+            "severity": "medium",
+            "reason": "Subjective terms are not objectively measurable"
+          },
+          {
+            "word": "容易",
+            "position": 2407,
+            "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。 发明内容",
+            "category": "subjective_terms",
+            "severity": "medium",
+            "reason": "Subjective terms are not objectively measurable"
+          }
+        ],
+        "recommendations": [
+          "Remove all high-severity banned words before submission"
+        ],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "abstract_validation": {
+      "passed": true,
+      "score": 1.0,
+      "details": {
+        "length": 26,
+        "has_title": true,
+        "has_technical_field": true,
+        "has_summary": true,
+        "missing_elements": [],
+        "length_issues": [
+          "Abstract too short: 26 < 50"
+        ],
+        "recommendations": [],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "background_leakage": {
+      "passed": true,
+      "score": 1.0,
+      "details": {
+        "background_length": 73,
+        "leakage_issues": [],
+        "overlap_scores": {
+          "invention_content": 0.0,
+          "embodiments": 0.0,
+          "claims": 0.0
+        },
+        "leaked_content": [],
+        "recommendations": [],
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    },
+    "claim_quality": {
+      "passed": true,
+      "score": 1.0,
+      "details": {
+        "issues": [],
+        "recommendations": [],
+        "summary": {
+          "claims_count": 6,
+          "independent_claims_count": 1,
+          "dependent_claims_count": 5,
+          "independent_feature_count": 5,
+          "total_feature_refs": 0,
+          "unsupported_feature_refs": 0,
+          "redundant_dependent_claims_count": 0,
+          "redundant_pairs": []
+        },
+        "errors": [],
+        "warnings": []
+      },
+      "errors": [],
+      "warnings": []
+    }
+  },
+  "errors": [
+    "Patent failed quality checks"
+  ],
+  "warnings": [],
+  "processing_time": 0.0,
+  "checks": [
+    {
+      "check": "ktf_completeness",
+      "name": "A 技术完整性（KTF）",
+      "passed": false,
+      "score": 1.0,
+      "errors": [],
+      "warnings": [
+        "KTF feature 5: Description is too short",
+        "KTF feature 6: Description is too short",
+        "KTF feature 7: Description is too short",
+        "KTF feature 8: Description is too short",
+        "KTF feature 9: Description is too short",
+        "KTF feature 10: Description is too short",
+        "KTF feature 11: Description is too short",
+        "KTF feature 12: Description is too short",
+        "KTF feature 13: Description is too short",
+        "KTF feature 14: Description is too short",
+        "KTF feature 15: Description is too short",
+        "KTF feature 16: Description is too short",
+        "KTF feature 17: Description is too short",
+        "KTF feature 18: Description is too short",
+        "KTF feature 19: Description is too short",
+        "KTF feature 20: Description is too short",
+        "Low coherence between problems, solutions, and effects"
+      ],
+      "issues": [],
+      "details": {
+        "ktf_features_count": 20,
+        "problems_count": 3,
+        "solutions_count": 3,
+        "effects_count": 1,
+        "missing_elements": [],
+        "recommendations": [
+          "Good: Rich set of technical features documented"
+        ],
+        "errors": [],
+        "warnings": [
+          "KTF feature 5: Description is too short",
+          "KTF feature 6: Description is too short",
+          "KTF feature 7: Description is too short",
+          "KTF feature 8: Description is too short",
+          "KTF feature 9: Description is too short",
+          "KTF feature 10: Description is too short",
+          "KTF feature 11: Description is too short",
+          "KTF feature 12: Description is too short",
+          "KTF feature 13: Description is too short",
+          "KTF feature 14: Description is too short",
+          "KTF feature 15: Description is too short",
+          "KTF feature 16: Description is too short",
+          "KTF feature 17: Description is too short",
+          "KTF feature 18: Description is too short",
+          "KTF feature 19: Description is too short",
+          "KTF feature 20: Description is too short",
+          "Low coherence between problems, solutions, and effects"
+        ]
+      }
+    },
+    {
+      "check": "supportability",
+      "name": "B 支持性（权利要求←说明书）",
+      "passed": false,
+      "score": 0.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "claims_count": 6,
+        "supported_claims": 0,
+        "unsupported_claims": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "support_scores": {
+          "claim_1": 0.25,
+          "claim_2": 0.0,
+          "claim_3": 0.0,
+          "claim_4": 0.0,
+          "claim_5": 0.0,
+          "claim_6": 0.0
+        },
+        "missing_elements": [],
+        "recommendations": [
+          "Ensure all claims are adequately supported by specification",
+          "Add missing technical details to specification"
+        ],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "term_consistency",
+      "name": "C 术语一致性",
+      "passed": false,
+      "score": 0.07692307692307693,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "total_terms": 13,
+        "consistent_terms": 1,
+        "inconsistent_terms": [
+          {
+            "term": "的所述技术还包括名称",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括专利",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括系统",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括技术",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "的所述技术还包括领域",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "大模型进行结构化抽取",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "。 发明内容： 为解决上述问题",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "名称",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "专利",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "系统",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "技术",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          },
+          {
+            "term": "领域",
+            "usage": {
+              "specification": 0,
+              "claims": 1,
+              "abstract": 0,
+              "disclosure": 0
+            },
+            "issue": "Term only appears in claims section"
+          }
+        ],
+        "term_usage": {
+          "：文本解析模块": {
+            "specification": 1,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 2
+          },
+          "的所述技术还包括名称": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括专利": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括系统": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括技术": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "的所述技术还包括领域": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "大模型进行结构化抽取": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "。 发明内容： 为解决上述问题": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "名称": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "专利": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "系统": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "技术": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          },
+          "领域": {
+            "specification": 0,
+            "claims": 1,
+            "abstract": 0,
+            "disclosure": 0
+          }
+        },
+        "recommendations": [
+          "Standardize terminology across all sections",
+          "Use consistent terms for the same concepts"
+        ],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "banned_words",
+      "name": "D 禁用词/绝对化表述",
+      "passed": false,
+      "score": 0.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "total_violations": 6,
+        "violations_by_category": {
+          "absolute_terms": [
+            {
+              "word": "绝对",
+              "position": 441,
+              "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+              "category": "absolute_terms",
+              "severity": "high",
+              "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+            },
+            {
+              "word": "绝对",
+              "position": 1434,
+              "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+              "category": "absolute_terms",
+              "severity": "high",
+              "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+            },
+            {
+              "word": "绝对",
+              "position": 2411,
+              "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。 发明内容：\n为解",
+              "category": "absolute_terms",
+              "severity": "high",
+              "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+            }
+          ],
+          "subjective_terms": [
+            {
+              "word": "容易",
+              "position": 437,
+              "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内",
+              "category": "subjective_terms",
+              "severity": "medium",
+              "reason": "Subjective terms are not objectively measurable"
+            },
+            {
+              "word": "容易",
+              "position": 1430,
+              "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内",
+              "category": "subjective_terms",
+              "severity": "medium",
+              "reason": "Subjective terms are not objectively measurable"
+            },
+            {
+              "word": "容易",
+              "position": 2407,
+              "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。 发明内容",
+              "category": "subjective_terms",
+              "severity": "medium",
+              "reason": "Subjective terms are not objectively measurable"
+            }
+          ]
+        },
+        "violations_by_severity": {
+          "high": 3,
+          "medium": 3,
+          "low": 0
+        },
+        "critical_violations": [
+          {
+            "word": "绝对",
+            "position": 441,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "绝对",
+            "position": 1434,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "绝对",
+            "position": 2411,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。 发明内容：\n为解",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          }
+        ],
+        "all_violations": [
+          {
+            "word": "绝对",
+            "position": 441,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "绝对",
+            "position": 1434,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内容：\n为",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "绝对",
+            "position": 2411,
+            "context": "以及权利要求支持性不足等问题。尤其在多轮修改过程中，容易引入[绝对]化表述或遗漏关键技术特征，导致质检不通过。 发明内容：\n为解",
+            "category": "absolute_terms",
+            "severity": "high",
+            "reason": "Absolute terms are generally not allowed in patents as they imply unlimited scope"
+          },
+          {
+            "word": "容易",
+            "position": 437,
+            "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内",
+            "category": "subjective_terms",
+            "severity": "medium",
+            "reason": "Subjective terms are not objectively measurable"
+          },
+          {
+            "word": "容易",
+            "position": 1430,
+            "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。\n\n发明内",
+            "category": "subjective_terms",
+            "severity": "medium",
+            "reason": "Subjective terms are not objectively measurable"
+          },
+          {
+            "word": "容易",
+            "position": 2407,
+            "context": "语不统一以及权利要求支持性不足等问题。尤其在多轮修改过程中，[容易]引入绝对化表述或遗漏关键技术特征，导致质检不通过。 发明内容",
+            "category": "subjective_terms",
+            "severity": "medium",
+            "reason": "Subjective terms are not objectively measurable"
+          }
+        ],
+        "recommendations": [
+          "Remove all high-severity banned words before submission"
+        ],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "abstract_validation",
+      "name": "E 摘要规范",
+      "passed": true,
+      "score": 1.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "length": 26,
+        "has_title": true,
+        "has_technical_field": true,
+        "has_summary": true,
+        "missing_elements": [],
+        "length_issues": [
+          "Abstract too short: 26 < 50"
+        ],
+        "recommendations": [],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "background_leakage",
+      "name": "F 背景泄漏/模板化问题",
+      "passed": true,
+      "score": 1.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "background_length": 73,
+        "leakage_issues": [],
+        "overlap_scores": {
+          "invention_content": 0.0,
+          "embodiments": 0.0,
+          "claims": 0.0
+        },
+        "leaked_content": [],
+        "recommendations": [],
+        "errors": [],
+        "warnings": []
+      }
+    },
+    {
+      "check": "claim_quality",
+      "name": "G 权利要求质量（结构/覆盖/风险）",
+      "passed": true,
+      "score": 1.0,
+      "errors": [],
+      "warnings": [],
+      "issues": [],
+      "details": {
+        "issues": [],
+        "recommendations": [],
+        "summary": {
+          "claims_count": 6,
+          "independent_claims_count": 1,
+          "dependent_claims_count": 5,
+          "independent_feature_count": 5,
+          "total_feature_refs": 0,
+          "unsupported_feature_refs": 0,
+          "redundant_dependent_claims_count": 0,
+          "redundant_pairs": []
+        },
+        "errors": [],
+        "warnings": []
+      }
+    }
+  ],
+  "recommendations": [
+    "Good: Rich set of technical features documented",
+    "Ensure all claims are adequately supported by specification",
+    "Add missing technical details to specification",
+    "Standardize terminology across all sections",
+    "Use consistent terms for the same concepts",
+    "Remove all high-severity banned words before submission"
+  ],
+  "kpis": {
+    "claims_count": 6,
+    "independent_claims_count": 1,
+    "avg_claim_length": 29.833333333333332,
+    "term_consistency_score": 0.07692307692307693,
+    "independent_claim_feature_count": 5,
+    "avg_features_per_claim": 0.0,
+    "unsupported_feature_ratio": 0.0,
+    "redundant_claim_ratio": 0.0
+  },
+  "metadata": {
+    "kpis": {
+      "claims_count": 6,
+      "independent_claims_count": 1,
+      "avg_claim_length": 29.833333333333332,
+      "term_consistency_score": 0.07692307692307693,
+      "independent_claim_feature_count": 5,
+      "avg_features_per_claim": 0.0,
+      "unsupported_feature_ratio": 0.0,
+      "redundant_claim_ratio": 0.0
+    }
+  },
+  "audit": {
+    "run_trace_id": "test-1767468821234234400",
+    "document_version": 1,
+    "extraction": {
+      "source": "rules",
+      "fallback_reason": "forced_rules",
+      "trace_id": "f5d52c63-24fb-465e-997e-6834e11c998a"
+    },
+    "generation": {
+      "claims": {
+        "source": "rules",
+        "trace_id": "771fb928-c6f0-42a4-849f-83904dad9c82",
+        "llm": null,
+        "fallback_reason": "forced_rules"
+      },
+      "abstract": {
+        "source": "rules",
+        "trace_id": "d3a63540-76b4-4031-b3c5-f7363cae46b5",
+        "llm": null,
+        "fallback_reason": "forced_rules"
+      }
+    },
+    "llm": null
+  }
+}

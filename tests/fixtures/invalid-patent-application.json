@@ -1,0 +1,16 @@
+{
+  "application_number": "invalid",
+  "filing_date": "2023-13-45",
+  "title": "Short",
+  "applicants": [],
+  "inventors": [],
+  "classification": {},
+  "claims": [
+    {
+      "claim_text": "Claim without number"
+    }
+  ],
+  "specification": {
+    "description": "Short"
+  }
+}

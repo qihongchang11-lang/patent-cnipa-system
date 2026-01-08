@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cnipa.gov.schemas/patent-application-v1.0.json",
+  "title": "CNIPA Patent Application Schema",
+  "description": "Schema for patent applications submitted to CNIPA",
+  "type": "object",
+  "required": ["application_number", "filing_date", "title", "applicants", "inventors", "classification"],
+  "properties": {
+    "application_number": {
+      "type": "string",
+      "pattern": "^[0-9]{14}",
+      "description": "CNIPA application number (14 digits)"
+    },
+    "filing_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of filing the application"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 500,
+      "description": "Title of the invention"
+    },
+    "language": {
+      "type": "string",
+      "enum": ["zh-CN", "en", "ja", "de", "fr", "other"],
+      "default": "zh-CN",
+      "description": "Language of the application"
+    },
+    "applicants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/applicant"
+      }
+    },
+    "inventors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/person"
+      }
+    },
+    "classification": {
+      "$ref": "#/$defs/classification"
+    },
+    "priority_claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/priority_claim"
+      }
+    },
+    "specification": {
+      "$ref": "#/$defs/specification"
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/claim"
+      }
+    },
+    "abstract": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Abstract of the invention"
+    },
+    "drawings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/drawing"
+      }
+    },
+    "sequence_listing": {
+      "$ref": "#/$defs/sequence_listing"
+    },
+    "pct_application": {
+      "$ref": "#/$defs/pct_application"
+    }
+  },
+  "$defs": {
+    "applicant": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "type": {
+          "type": "string",
+          "enum": ["individual", "company", "university", "government"],
+          "default": "company"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        },
+        "contact_info": {
+          "$ref": "#/$defs/contact_info"
+        },
+        "registration_number": {
+          "type": "string",
+          "description": "Business registration number if applicable"
+        }
+      }
+    },
+    "person": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        },
+        "nationality": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code"
+        },
+        "id_number": {
+          "type": "string",
+          "description": "National ID or passport number"
+        }
+      }
+    },
+    "address": {
+      "type": "object",
+      "required": ["street", "city", "country"],
+      "properties": {
+        "street": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "city": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "state_province": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "postal_code": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code"
+        }
+      }
+    },
+    "contact_info": {
+      "type": "object",
+      "properties": {
+        "telephone": {
+          "type": "string",
+          "pattern": "^[+]?[0-9]{6,15}$"
+        },
+        "fax": {
+          "type": "string",
+          "pattern": "^[+]?[0-9]{6,15}$"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        }
+      }
+    },
+    "classification": {
+      "type": "object",
+      "required": ["ipc"],
+      "properties": {
+        "ipc": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-H][0-9]{1,2}[A-Z] [0-9]{1,4}/[0-9]{2,4}$"
+          }
+        },
+        "cpc": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-H][0-9]{2}[A-Z] [0-9]{1,4}/[0-9]{2,4}$"
+          }
+        },
+        "fi": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "priority_claim": {
+      "type": "object",
+      "required": ["country", "priority_date"],
+      "properties": {
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "priority_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "priority_number": {
+          "type": "string"
+        }
+      }
+    },
+    "specification": {
+      "type": "object",
+      "required": ["description"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 100,
+          "description": "Detailed description of the invention"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "citation": {
+                "type": "string"
+              },
+              "relevance": {
+                "type": "string",
+                "enum": ["background", "prior_art", "related", "incorporated"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": ["claim_text"],
+      "properties": {
+        "claim_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "claim_text": {
+          "type": "string",
+          "minLength": 10
+        },
+        "claim_type": {
+          "type": "string",
+          "enum": ["independent", "dependent", "multiple_dependent"]
+        }
+      }
+    },
+    "drawing": {
+      "type": "object",
+      "required": ["file_reference"],
+      "properties": {
+        "file_reference": {
+          "type": "string"
+        },
+        "drawing_number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "description": {
+          "type": "string"
+        },
+        "figure_type": {
+          "type": "string",
+          "enum": ["drawing", "chart", "photograph", "sketch"]
+        }
+      }
+    },
+    "sequence_listing": {
+      "type": "object",
+      "properties": {
+        "file_reference": {
+          "type": "string"
+        },
+        "sequence_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "format": {
+          "type": "string",
+          "enum": ["ST.25", "FST26"]
+        }
+      }
+    },
+    "pct_application": {
+      "type": "object",
+      "properties": {
+        "application_number": {
+          "type": "string"
+        },
+        "international_filing_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "receiving_office": {
+          "type": "string"
+        },
+        "international_status": {
+          "type": "string",
+          "enum": ["pending", "international_preliminary_examination", "national_phase"]
+        }
+      }
+    }
+  }
+}

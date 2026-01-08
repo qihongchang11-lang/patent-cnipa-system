@@ -1,0 +1,54 @@
+{
+  "success": true,
+  "quality_score": 0.0,
+  "check_results": {},
+  "errors": [],
+  "warnings": [],
+  "processing_time": 0.0,
+  "checks": [],
+  "recommendations": [],
+  "kpis": {},
+  "metadata": {
+    "title": "????",
+    "technical_field": "??????",
+    "document_type": "invention",
+    "processing_timestamp": "2026-01-05T10:26:09.256678",
+    "quality_score": 0.0
+  },
+  "audit": {
+    "run_trace_id": "29d48c81-9e99-42c9-9a18-c7299c073a97",
+    "document_version": 1,
+    "extraction": {
+      "source": "rules",
+      "fallback_reason": "llm_unavailable_or_invalid",
+      "trace_id": "018e47c2-f7be-4874-87d5-c4079e8d4a78"
+    },
+    "generation": {
+      "claims": {
+        "source": "rules",
+        "trace_id": "dd98bcb5-c4a1-440b-ac00-06ece2448f7c",
+        "llm": {
+          "provider": "api.deepseek.com",
+          "base_url": "https://api.deepseek.com/v1",
+          "model": "deepseek-chat"
+        },
+        "fallback_reason": "llm_unavailable_or_invalid"
+      },
+      "abstract": {
+        "source": "rules",
+        "trace_id": "c05bf72e-8122-4e57-ace9-08c321870526",
+        "llm": {
+          "provider": "api.deepseek.com",
+          "base_url": "https://api.deepseek.com/v1",
+          "model": "deepseek-chat"
+        },
+        "fallback_reason": "llm_unavailable_or_invalid"
+      }
+    },
+    "llm": {
+      "provider": "api.deepseek.com",
+      "base_url": "https://api.deepseek.com/v1",
+      "model": "deepseek-chat"
+    }
+  }
+}

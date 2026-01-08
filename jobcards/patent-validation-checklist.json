@@ -1,0 +1,126 @@
+{
+  "id": "patent-validation-checklist",
+  "name": "Patent Validation Checklist",
+  "description": "Comprehensive validation checklist for patent applications",
+  "version": "1.0.0",
+  "type": "checklist",
+  "categories": [
+    {
+      "id": "formal-requirements",
+      "name": "Formal Requirements",
+      "description": "Check formal requirements and completeness",
+      "checks": [
+        {
+          "id": "application-format",
+          "name": "Application Format",
+          "description": "Check application format compliance",
+          "rules": [
+            "Documents must be in valid XML format",
+            "All required sections present",
+            "File size does not exceed 50MB"
+          ]
+        },
+        {
+          "id": "required-documents",
+          "name": "Required Documents",
+          "description": "Check presence of all required documents",
+          "documents": [
+            "specification",
+            "claims",
+            "abstract",
+            "drawings"
+          ]
+        },
+        {
+          "id": "language-requirements",
+          "name": "Language Requirements",
+          "description": "Check language compliance",
+          "languages": ["Chinese", "English"],
+          "translations": "Required when application is in foreign language"
+        }
+      ]
+    },
+    {
+      "id": "legal-requirements",
+      "name": "Legal Requirements",
+      "description": "Check legal compliance and patentability",
+      "checks": [
+        {
+          "id": "patentability",
+          "name": "Patentability Requirements",
+          "description": "Check basic patentability criteria",
+          "criteria": [
+            "Novelty",
+            "Inventive Step",
+            "Industrial Applicability",
+            "Non-excluded Subject Matter"
+          ]
+        },
+        {
+          "id": "priority-claims",
+          "name": "Priority Claims",
+          "description": "Validate any priority claims",
+          "requirements": [
+            "Valid priority documents",
+            "Correct priority dates",
+            "Proper claim format"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "technical-requirements",
+      "name": "Technical Requirements",
+      "description": "Check technical content and specifications",
+      "checks": [
+        {
+          "id": "specification-quality",
+          "name": "Specification Quality",
+          "description": "Check specification quality and completeness",
+          "requirements": [
+            "Clear description of invention",
+            "Enablement requirements met",
+            "Best mode disclosed",
+            "Sufficient technical detail"
+          ]
+        },
+        {
+          "id": "claim-quality",
+          "name": "Claim Quality",
+          "description": "Check claim quality and format",
+          "requirements": [
+            "Clear and concise claims",
+            "Proper claim format",
+            "Support in specification",
+            "No indefinite limitations"
+          ]
+        }
+      ]
+    }
+  ],
+  "scoring": {
+    "type": "weighted",
+    "weights": {
+      "formal-requirements": 30,
+      "legal-requirements": 40,
+      "technical-requirements": 30
+    },
+    "thresholds": {
+      "pass": 80,
+      "conditional": 60,
+      "fail": 0
+    }
+  },
+  "automated_checks": [
+    "format-validation",
+    "schema-compliance",
+    "required-fields",
+    "date-validation",
+    "classification-check"
+  ],
+  "manual_reviews": [
+    "technical-content-assessment",
+    "legal-interpretation",
+    "examination-quality-review"
+  ]
+}

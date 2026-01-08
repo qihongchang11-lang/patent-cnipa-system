@@ -1,0 +1,206 @@
+{
+  "id": "patent-application-processing",
+  "name": "CNIPA Patent Application Processing Pipeline",
+  "description": "Complete workflow for processing patent applications through CNIPA system",
+  "version": "1.0.0",
+  "created": "2024-01-01T00:00:00Z",
+  "modified": "2024-01-01T00:00:00Z",
+  "steps": [
+    {
+      "id": "receive-application",
+      "name": "Receive Patent Application",
+      "type": "input-handler",
+      "description": "Receive and validate initial patent application package",
+      "parameters": {
+        "allowedFormats": ["xml", "docx", "pdf"],
+        "maxFileSize": "50MB",
+        "requiredDocuments": [
+          "specification",
+          "claims",
+          "abstract",
+          "drawings"
+        ]
+      },
+      "next": ["validate-schema"]
+    },
+    {
+      "id": "validate-schema",
+      "name": "Schema Validation",
+      "type": "validation",
+      "description": "Validate application against CNIPA XML schema",
+      "parameters": {
+        "schemaFile": "schema/cnipa-patent-v1.0.xsd",
+        "strictMode": true,
+        "reportErrors": true
+      },
+      "next": ["check-formal-requirements"]
+    },
+    {
+      "id": "check-formal-requirements",
+      "name": "Formal Requirements Check",
+      "type": "quality-gate",
+      "description": "Check application formal requirements and completeness",
+      "parameters": {
+        "requiredFields": [
+          "title",
+          "applicant_name",
+          "inventor_name",
+          "filing_date",
+          "classification_code"
+        ],
+        "optionalFields": ["priority_date", "pct_number"],
+        "validationRules": [
+          "format-requirements",
+          "claim-format",
+          "drawing-requirements"
+        ]
+      },
+      "next": ["substantive-examination"]
+    },
+    {
+      "id": "substantive-examination",
+      "name": "Substantive Examination",
+      "type": "examination",
+      "description": "Perform substantive examination of patent application",
+      "parameters": {
+        "examinationModules": [
+          "novelty-check",
+          "inventive-step",
+          "industrial-applicability"
+        ],
+        "priorArtDatabases": [
+          "CNIPA",
+          "WIPO",
+          "EPO",
+          "USPTO"
+        ],
+        "searchStrategy": "comprehensive",
+        "classificationSystems": ["CPC", "IPC", "FI"]
+      },
+      "next": ["quality-review"]
+    },
+    {
+      "id": "quality-review",
+      "name": "Quality Review",
+      "type": "review",
+      "description": "Internal quality review of examination results",
+      "parameters": {
+        "reviewCriteria": [
+          "examination-quality",
+          "documentation-completeness",
+          "legal-compliance"
+        ],
+        "reviewDepth": "detailed",
+        "signOffRequired": true
+      },
+      "next": ["generate-office-actions"]
+    },
+    {
+      "id": "generate-office-actions",
+      "name": "Generate Office Actions",
+      "type": "document-generation",
+      "description": "Generate official office actions and notifications",
+      "parameters": {
+        "documentTypes": [
+          "first-office-action",
+          "final-office-action",
+          "allowance-notice",
+          "rejection-notice"
+        ],
+        "templateDirectory": "templates/office-actions/",
+        "outputFormat": "pdf",
+        "multilingual": true,
+        "languages": ["zh-CN", "en"]
+      },
+      "next": ["applicant-response"]
+    },
+    {
+      "id": "applicant-response",
+      "name": "Wait for Applicant Response",
+      "type": "waiting",
+      "description": "Wait for applicant response to office actions",
+      "parameters": {
+        "responseTimeout": 90,
+        "extensionAllowed": true,
+        "maxExtensions": 2
+      },
+      "next": ["finalize-decision"]
+    },
+    {
+      "id": "finalize-decision",
+      "name": "Finalize Patent Decision",
+      "type": "decision",
+      "description": "Make final decision on patent application",
+      "parameters": {
+        "decisionTypes": ["grant", "reject", "amend"],
+        "appealAllowed": true,
+        "publicationRequired": true
+      },
+      "next": ["generate-final-documents"]
+    },
+    {
+      "id": "generate-final-documents",
+      "name": "Generate Final Documents",
+      "type": "document-generation",
+      "description": "Generate final patent grant or rejection documents",
+      "parameters": {
+        "documentTypes": [
+          "patent-grant",
+          "rejection-decision",
+          "amendment-notice"
+        ],
+        "certificationRequired": true,
+        "digitalSignature": true
+      },
+      "next": ["archive-case"]
+    },
+    {
+      "id": "archive-case",
+      "name": "Archive Patent Case",
+      "type": "archival",
+      "description": "Archive complete patent case with all documents",
+      "parameters": {
+        "retentionPolicy": "permanent",
+        "backupRequired": true,
+        "publicationSchedule": "automatic"
+      }
+    }
+  ],
+  "errorHandling": {
+    "retryPolicy": {
+      "maxRetries": 3,
+      "retryDelay": "exponential",
+      "backoffMultiplier": 2
+    },
+    "escalation": {
+      "enabled": true,
+      "escalationLevels": ["supervisor", "manager", "director"]
+    },
+    "notifications": {
+      "email": true,
+      "slac": true,
+      "sms": false
+    }
+  },
+  "performance": {
+    "timeout": "24h",
+    "priority": "normal",
+    "parallelProcessing": true,
+    "maxConcurrentSteps": 5
+  },
+  "monitoring": {
+    "metrics": ["duration", "success-rate", "error-count"],
+    "alerts": [
+      {
+        "condition": "step-failure",
+        "threshold": 1,
+        "action": "notify"
+      },
+      {
+        "condition": "timeout",
+        "threshold": "24h",
+        "action": "escalate"
+      }
+    ]
+  }
+}

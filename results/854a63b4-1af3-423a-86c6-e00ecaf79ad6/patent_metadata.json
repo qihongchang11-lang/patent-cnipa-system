@@ -1,0 +1,210 @@
+{
+  "metadata": {
+    "title": "????",
+    "application_number": null,
+    "filing_date": null,
+    "priority_date": null,
+    "applicant": null,
+    "inventor": null,
+    "agent": null,
+    "technical_field": "??????",
+    "document_type": "invention",
+    "language": "zh-CN",
+    "created_at": "2026-01-05T10:25:25.127488",
+    "updated_at": "2026-01-05T10:25:25.127488"
+  },
+  "specification": {
+    "technical_field": "本发明涉及??????，特别是关于??????中的改进技术。",
+    "background_art": "在领域中，现有技术存在以下问题：\n\n\n\n因此，需要一种新的技术方案来解决上述问题。",
+    "invention_content": "本发明的目的在于提供一种技术方案，能够解决现有技术中的问题。\n\n本发明的技术方案如下：\n\n??????\n\n本发明的有益效果包括：\n1. 提高了技术性能\n2. 降低了成本\n3. 简化了操作流程",
+    "description_of_drawings": null,
+    "embodiments": "以下结合具体实施例对本发明进行详细说明。\n\n\n\n本领域技术人员应当理解，上述实施例仅用于说明本发明，而不应视为限制本发明的范围。",
+    "content": "说明书\n\n技术领域\n本发明涉及??????，特别是关于??????中的改进技术。\n\n背景技术\n在领域中，现有技术存在以下问题：\n\n\n\n因此，需要一种新的技术方案来解决上述问题。\n\n发明内容\n本发明的目的在于提供一种技术方案，能够解决现有技术中的问题。\n\n本发明的技术方案如下：\n\n??????\n\n本发明的有益效果包括：\n1. 提高了技术性能\n2. 降低了成本\n3. 简化了操作流程\n\n具体实施方式\n以下结合具体实施例对本发明进行详细说明。\n\n\n\n本领域技术人员应当理解，上述实施例仅用于说明本发明，而不应视为限制本发明的范围。\n"
+  },
+  "claims": {
+    "independent_claims": [
+      {
+        "claim_number": 1,
+        "preamble": "一种??????技术，",
+        "transition": "其特征在于",
+        "body": "包括必要的技术特征。",
+        "technical_features": []
+      }
+    ],
+    "dependent_claims": [
+      {
+        "claim_number": 2,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括名称",
+        "technical_features": [
+          {
+            "name": "名称",
+            "description": "技术术语：名称",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      },
+      {
+        "claim_number": 3,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括技术",
+        "technical_features": [
+          {
+            "name": "技术",
+            "description": "技术术语：技术",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      },
+      {
+        "claim_number": 4,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括领域",
+        "technical_features": [
+          {
+            "name": "领域",
+            "description": "技术术语：领域",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      },
+      {
+        "claim_number": 5,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括背景",
+        "technical_features": [
+          {
+            "name": "背景",
+            "description": "技术术语：背景",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      },
+      {
+        "claim_number": 6,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括内容",
+        "technical_features": [
+          {
+            "name": "内容",
+            "description": "技术术语：内容",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      }
+    ],
+    "content": "权利要求书\n\n权利要求1：\n一种??????技术，其特征在于包括必要的技术特征。\n\n权利要求2：\n根据权利要求1所述的所述技术还包括名称。\n\n权利要求3：\n根据权利要求1所述的所述技术还包括技术。\n\n权利要求4：\n根据权利要求1所述的所述技术还包括领域。\n\n权利要求5：\n根据权利要求1所述的所述技术还包括背景。\n\n权利要求6：\n根据权利要求1所述的所述技术还包括内容。\n\n"
+  },
+  "abstract": {
+    "title": "????",
+    "technical_field": "??????",
+    "summary": "??????",
+    "main_figure_description": null,
+    "content": "摘要\n\n发明名称：????\n技术领域：??????\n\n??????\n"
+  },
+  "disclosure": {
+    "detailed_description": "以下对本发明的具体实施方式进行详细描述。\n\n\n\n本发明的技术方案基于以下分析：\n",
+    "examples": [],
+    "drawings": [
+      "图1：本发明的整体结构示意图",
+      "图2：关键部件的详细结构图"
+    ],
+    "content": "具体实施方式\n\n以下对本发明的具体实施方式进行详细描述。\n\n\n\n本发明的技术方案基于以下分析：\n\n\n附图说明\n\n- 图1：本发明的整体结构示意图\n- 图2：关键部件的详细结构图"
+  },
+  "pse_matrix": {
+    "problems": [],
+    "solutions": [],
+    "effects": [],
+    "kt_features": [
+      {
+        "name": "名称",
+        "description": "技术术语：名称",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "技术",
+        "description": "技术术语：技术",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "领域",
+        "description": "技术术语：领域",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "背景",
+        "description": "技术术语：背景",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "内容",
+        "description": "技术术语：内容",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "方式",
+        "description": "技术术语：方式",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      }
+    ],
+    "audit": {
+      "extraction_source": "rules",
+      "fallback_reason": "llm_unavailable_or_invalid",
+      "llm": {
+        "provider": "api.deepseek.com",
+        "base_url": "https://api.deepseek.com/v1",
+        "model": "deepseek-chat"
+      },
+      "trace_id": "018e47c2-f7be-4874-87d5-c4079e8d4a78"
+    }
+  },
+  "quality_score": null,
+  "quality_report": null,
+  "audit": {
+    "generation": {
+      "claims": {
+        "source": "rules",
+        "trace_id": "dd98bcb5-c4a1-440b-ac00-06ece2448f7c",
+        "llm": {
+          "provider": "api.deepseek.com",
+          "base_url": "https://api.deepseek.com/v1",
+          "model": "deepseek-chat"
+        },
+        "fallback_reason": "llm_unavailable_or_invalid"
+      },
+      "abstract": {
+        "source": "rules",
+        "trace_id": "c05bf72e-8122-4e57-ace9-08c321870526",
+        "llm": {
+          "provider": "api.deepseek.com",
+          "base_url": "https://api.deepseek.com/v1",
+          "model": "deepseek-chat"
+        },
+        "fallback_reason": "llm_unavailable_or_invalid"
+      }
+    }
+  },
+  "document_version": 1
+}

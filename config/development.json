@@ -1,0 +1,43 @@
+{
+  "server": {
+    "port": 3000
+  },
+  "database": {
+    "host": "localhost",
+    "name": "cnipa_patents_dev"
+  },
+  "redis": {
+    "connectionTimeout": "10s",
+    "commandTimeout": "5s"
+  },
+  "logging": {
+    "level": "debug",
+    "format": "pretty"
+  },
+  "validation": {
+    "strictMode": false,
+    "enableDetailedErrors": true,
+    "throwOnValidationError": false
+  },
+  "orchestrator": {
+    "parallelProcessing": true,
+    "maxConcurrentProcessing": 2,
+    "timeout": {
+      "overall": "1h"
+    }
+  },
+  "monitoring": {
+    "metrics": {
+      "enabled": true,
+      "collector": "console"
+    }
+  },
+  "notifications": {
+    "email": {
+      "enabled": false
+    },
+    "webhook": {
+      "enabled": false
+    }
+  }
+}

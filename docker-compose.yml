@@ -1,0 +1,40 @@
+services:
+  api:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: >
+      bash -lc "pip install -r requirements.txt && python api_main.py"
+
+  ui_v2:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      PUBLIC_API_BASE_URL: "http://api:8000"
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
+    command: >
+      bash -lc "pip install -r requirements.txt streamlit && streamlit run patent_streamlit_app.py --server.address 0.0.0.0 --server.port 8501"
+
+  cockpit_v3:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      PUBLIC_API_BASE_URL: "http://api:8000"
+    depends_on:
+      - api
+    ports:
+      - "8502:8502"
+    command: >
+      bash -lc "pip install -r requirements.txt streamlit && streamlit run cockpit_app.py --server.address 0.0.0.0 --server.port 8502"

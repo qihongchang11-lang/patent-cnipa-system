@@ -1,0 +1,270 @@
+{
+  "metadata": {
+    "title": "一种交互式专利编辑与质检系统",
+    "application_number": null,
+    "filing_date": null,
+    "priority_date": null,
+    "applicant": null,
+    "inventor": null,
+    "agent": null,
+    "technical_field": "专利撰写辅助与质量检查",
+    "document_type": "invention",
+    "language": "zh-CN",
+    "created_at": "2026-01-03T19:58:06.525215",
+    "updated_at": "2026-01-03T19:58:06.525215"
+  },
+  "specification": {
+    "technical_field": "本发明涉及专利撰写辅助与质量检查，特别是关于专利撰写辅助与质量检查中的改进技术。",
+    "background_art": "在现有专利撰写修改成本高，缺少即时复检能力。领域中，现有技术存在以下问题：\n\n现有专利撰写修改成本高，缺少即时复检能力。\n\n因此，需要一种新的技术方案来解决上述问题。",
+    "invention_content": "本发明的目的在于提供一种技术方案，能够解决现有技术中的问题。\n\n本发明的技术方案如下：\n\n提供一种可对权利要求进行逐条编辑并可按需复检的系统与方法。\n\n本发明的有益效果包括：\n1. 提高了技术性能\n2. 降低了成本\n3. 简化了操作流程",
+    "description_of_drawings": null,
+    "embodiments": "以下结合具体实施例对本发明进行详细说明。\n\n实施例：用户修改权利要求1后触发复检，系统输出更新后的质检报告。\n\n本领域技术人员应当理解，上述实施例仅用于说明本发明，而不应视为限制本发明的范围。",
+    "content": "说明书\n\n技术领域\n本发明涉及专利撰写辅助与质量检查，特别是关于专利撰写辅助与质量检查中的改进技术。\n\n背景技术\n在现有专利撰写修改成本高，缺少即时复检能力。领域中，现有技术存在以下问题：\n\n现有专利撰写修改成本高，缺少即时复检能力。\n\n因此，需要一种新的技术方案来解决上述问题。\n\n发明内容\n本发明的目的在于提供一种技术方案，能够解决现有技术中的问题。\n\n本发明的技术方案如下：\n\n提供一种可对权利要求进行逐条编辑并可按需复检的系统与方法。\n\n本发明的有益效果包括：\n1. 提高了技术性能\n2. 降低了成本\n3. 简化了操作流程\n\n具体实施方式\n以下结合具体实施例对本发明进行详细说明。\n\n实施例：用户修改权利要求1后触发复检，系统输出更新后的质检报告。\n\n本领域技术人员应当理解，上述实施例仅用于说明本发明，而不应视为限制本发明的范围。\n"
+  },
+  "claims": {
+    "independent_claims": [
+      {
+        "claim_number": 1,
+        "preamble": "一种专利撰写辅助系统，其特征在于，包括：文本解析模块、编辑模块、质量复检模块以及导出模块。",
+        "transition": "",
+        "body": "",
+        "technical_features": []
+      }
+    ],
+    "dependent_claims": [
+      {
+        "claim_number": 2,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括名称",
+        "technical_features": [
+          {
+            "name": "名称",
+            "description": "技术术语：名称",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      },
+      {
+        "claim_number": 3,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括专利",
+        "technical_features": [
+          {
+            "name": "专利",
+            "description": "技术术语：专利",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      },
+      {
+        "claim_number": 4,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括编辑",
+        "technical_features": [
+          {
+            "name": "编辑",
+            "description": "技术术语：编辑",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      },
+      {
+        "claim_number": 5,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括系统",
+        "technical_features": [
+          {
+            "name": "系统",
+            "description": "技术术语：系统",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      },
+      {
+        "claim_number": 6,
+        "parent_claim": 1,
+        "additional_features": "所述技术还包括技术",
+        "technical_features": [
+          {
+            "name": "技术",
+            "description": "技术术语：技术",
+            "category": "technical_term",
+            "is_essential": false,
+            "references": []
+          }
+        ]
+      }
+    ],
+    "content": "权利要求书\n\n权利要求1：\n一种专利撰写辅助系统，其特征在于，包括：文本解析模块、编辑模块、质量复检模块以及导出模块。\n\n权利要求2：\n根据权利要求1所述的所述技术还包括名称。\n\n权利要求3：\n根据权利要求1所述的所述技术还包括专利。\n\n权利要求4：\n根据权利要求1所述的所述技术还包括编辑。\n\n权利要求5：\n根据权利要求1所述的所述技术还包括系统。\n\n权利要求6：\n根据权利要求1所述的所述技术还包括技术。\n"
+  },
+  "abstract": {
+    "title": "一种交互式专利编辑与质检系统",
+    "technical_field": "专利撰写辅助与质量检查",
+    "summary": "提供一种可对权利要求进行逐条编辑并可按需复检的系统与方法。",
+    "main_figure_description": null,
+    "content": "摘要\n\n发明名称：一种交互式专利编辑与质检系统\n技术领域：专利撰写辅助与质量检查\n\n提供一种可对权利要求进行逐条编辑并可按需复检的系统与方法。\n"
+  },
+  "disclosure": {
+    "detailed_description": "以下对本发明的具体实施方式进行详细描述。\n\n实施例：用户修改权利要求1后触发复检，系统输出更新后的质检报告。\n\n本发明的技术方案基于以下分析：\n\n提出的技术解决方案：\n- 发明内容：提供一种可对权利要求进行逐条编辑并可按需复检的系统与方法\n",
+    "examples": [],
+    "drawings": [
+      "图1：本发明的整体结构示意图",
+      "图2：关键部件的详细结构图"
+    ],
+    "content": "具体实施方式\n\n以下对本发明的具体实施方式进行详细描述。\n\n实施例：用户修改权利要求1后触发复检，系统输出更新后的质检报告。\n\n本发明的技术方案基于以下分析：\n\n提出的技术解决方案：\n- 发明内容：提供一种可对权利要求进行逐条编辑并可按需复检的系统与方法\n\n\n附图说明\n\n- 图1：本发明的整体结构示意图\n- 图2：关键部件的详细结构图"
+  },
+  "pse_matrix": {
+    "problems": [],
+    "solutions": [
+      "发明内容：提供一种可对权利要求进行逐条编辑并可按需复检的系统与方法"
+    ],
+    "effects": [],
+    "kt_features": [
+      {
+        "name": "名称",
+        "description": "技术术语：名称",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "专利",
+        "description": "技术术语：专利",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "编辑",
+        "description": "技术术语：编辑",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "系统",
+        "description": "技术术语：系统",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "技术",
+        "description": "技术术语：技术",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "领域",
+        "description": "技术术语：领域",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "质量检查",
+        "description": "技术术语：质量检查",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "背景",
+        "description": "技术术语：背景",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "成本",
+        "description": "技术术语：成本",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "能力",
+        "description": "技术术语：能力",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "内容",
+        "description": "技术术语：内容",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "权利",
+        "description": "技术术语：权利",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "方法",
+        "description": "技术术语：方法",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "方式",
+        "description": "技术术语：方式",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "用户",
+        "description": "技术术语：用户",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      },
+      {
+        "name": "报告",
+        "description": "技术术语：报告",
+        "category": "technical_term",
+        "is_essential": false,
+        "references": []
+      }
+    ],
+    "audit": {
+      "extraction_source": "rules",
+      "fallback_reason": "llm_unavailable_or_invalid",
+      "llm": null,
+      "trace_id": "11cc265e-4b3e-408f-bf33-0120d41b1e3b"
+    }
+  },
+  "quality_score": null,
+  "quality_report": null,
+  "audit": {
+    "generation": {
+      "claims": {
+        "source": "rules",
+        "trace_id": "d4accce7-a205-4d43-be25-7ed5dcf750f5",
+        "llm": null,
+        "fallback_reason": "llm_unavailable_or_invalid"
+      },
+      "abstract": {
+        "source": "rules",
+        "trace_id": "8c0ba0f7-629a-4cf4-9f0f-5e1fcac2c95c",
+        "llm": null,
+        "fallback_reason": "llm_unavailable_or_invalid"
+      }
+    }
+  },
+  "document_version": 2
+}
