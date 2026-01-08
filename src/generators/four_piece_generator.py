@@ -107,7 +107,7 @@ class FourPieceGenerator:
         embodiments: str,
         pse_matrix: Optional[PSEMatrix] = None,
         drawings_description: Optional[str] = None,
-        llm_temperature: float = 0.2,
+        llm_temperature: float = 0.7,
     ) -> PatentDocument:
         """Generate all four patent documents"""
 
@@ -230,7 +230,7 @@ class FourPieceGenerator:
         technical_field: str,
         invention_content: str,
         pse_matrix: Optional[PSEMatrix] = None,
-        llm_temperature: float = 0.2,
+        llm_temperature: float = 0.7,
     ) -> Claims:
         """Generate patent claims"""
         claims, _audit = self._generate_claims_with_audit(
@@ -248,7 +248,7 @@ class FourPieceGenerator:
         technical_field: str,
         invention_content: str,
         pse_matrix: Optional[PSEMatrix],
-        llm_temperature: float = 0.2,
+        llm_temperature: float = 0.7,
     ) -> Tuple[Claims, Dict]:
         # 1) Try LLM (structured JSON)
         if (not self.force_rules) and self.llm_client.is_configured():
@@ -390,7 +390,7 @@ class FourPieceGenerator:
         title: str,
         technical_field: str,
         invention_content: str,
-        llm_temperature: float = 0.2,
+        llm_temperature: float = 0.7,
     ) -> Abstract:
         """Generate patent abstract"""
         abstract, _audit = self._generate_abstract_with_audit(
@@ -408,7 +408,7 @@ class FourPieceGenerator:
         technical_field: str,
         invention_content: str,
         pse_matrix: Optional[PSEMatrix],
-        llm_temperature: float = 0.2,
+        llm_temperature: float = 0.7,
     ) -> Tuple[Abstract, Dict]:
         if (not self.force_rules) and self.llm_client.is_configured():
             system_prompt = (
