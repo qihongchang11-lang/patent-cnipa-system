@@ -40,8 +40,22 @@ h1 { text-align: center; }
 .subtitle { text-align: center; color: gray; margin-bottom: 2em; }
 
 /* Block-style tabs */
-.stTabs [data-baseweb="tab-list"] { gap: 6px; }
-.stTabs [data-baseweb="tab"] { flex-grow: 1; text-align: center; font-weight: 700; }
+.stTabs [data-baseweb="tab-list"] { gap: 8px; }
+.stTabs [data-baseweb="tab"] {
+  flex-grow: 1;
+  text-align: center;
+  font-weight: 800;
+  border-radius: 10px;
+  background: #E5E7EB;
+  color: #111827;
+  border: 1px solid #CBD5E1;
+}
+.stTabs [data-baseweb="tab"] > div { justify-content: center; }
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+  background: #1E3D59;
+  color: #FFFFFF;
+  border: 1px solid #1E3D59;
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -217,8 +231,18 @@ with col_input:
     st.markdown("### ✍️ 撰写工作台")
     inv_title = st.text_input("发明名称", key="input_title")
     domain = st.text_input("所属技术领域", key="input_technical_field", placeholder="例如：卷烟包装设备、视觉检测")
-    bg = st.text_area("背景技术（现有技术痛点）", key="input_background", height=150)
-    inv_content = st.text_area("发明内容（核心技术方案）", key="input_invention_content", height=200)
+    bg = st.text_area(
+        "背景技术（现有技术痛点）",
+        key="input_background",
+        height=150,
+        placeholder="请描述当前技术或工艺存在的主要痛点。例如：人工效率低、废品率高、设备故障频繁...",
+    )
+    inv_content = st.text_area(
+        "发明内容（核心技术方案）",
+        key="input_invention_content",
+        height=200,
+        placeholder="请详细描述您的改进方案。例如：增加了XX结构、采用了XX算法、优化了XX流程...",
+    )
     impl = st.text_area("具体实施方式（可选）", key="input_embodiments", height=100)
 
     st.markdown("###")
@@ -277,7 +301,7 @@ with col_output:
     else:
         report = st.session_state.get("quality_report") or {}
         score = float((report or {}).get("quality_score", 0.0) or 0.0)
-        st.write(f"✅ 状态：生成完成 | 综合评分：{score:.2f}")
+        st.success(f"✅ 状态：生成完成 | 综合评分：{score:.2f}")
 
         gen = st.session_state.get("generated_results") or {}
 
@@ -317,3 +341,8 @@ with col_output:
                 use_container_width=True,
                 disabled=not bool(st.session_state.get("zip_bytes")),
             )
+
+st.markdown(
+    "<p style='text-align: center; color: #6B7280; margin-top: 2em;'>© 2026 宁波卷烟厂 | 内部科研专用系统</p>",
+    unsafe_allow_html=True,
+)
