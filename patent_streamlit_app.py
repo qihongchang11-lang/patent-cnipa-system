@@ -6,10 +6,17 @@ import tempfile
 import uuid
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 import streamlit as st
 
+# Streamlit requirement: set_page_config must be the first Streamlit command.
+st.set_page_config(
+    page_title="CNIPA Patent Draft Generator",
+    page_icon="⚖️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
 # Ensure `src/` imports work on Streamlit Community Cloud
 REPO_ROOT = Path(__file__).resolve().parent
@@ -23,7 +30,7 @@ from orchestrator.pipeline_orchestrator import PipelineOrchestrator, ProcessingR
 
 
 def _get_setting(key: str) -> str:
-    # 1) Streamlit Cloud secrets
+    # 1) Streamlit Cloud secrets (highest priority)
     try:
         v = st.secrets.get(key)  # type: ignore[attr-defined]
         if v is not None and str(v).strip():
@@ -37,14 +44,12 @@ def _get_setting(key: str) -> str:
 
 
 def _get_llm_api_key() -> str:
+    # Accept either name as "auth ok"
     return _get_setting("LLM_API_KEY") or _get_setting("OPENAI_API_KEY")
 
 
 def _apply_runtime_env_from_secrets() -> None:
-    """
-    Make downstream modules (e.g. utils.llm_client.LLMClient) pick up Streamlit secrets.
-    This avoids any dependency on a local `.env` file in production.
-    """
+    # Let downstream modules (e.g. utils.llm_client.LLMClient) read from os.environ.
     llm_api_key = _get_llm_api_key()
     if llm_api_key:
         os.environ["LLM_API_KEY"] = llm_api_key
@@ -87,6 +92,10 @@ def _run_monolithic_pipeline(
     embodiments: str,
     enable_checks: bool,
 ) -> Tuple[bytes, Dict[str, str], Dict[str, Any]]:
+    """
+    Monolithic pipeline: runs everything in-process.
+    Never makes any HTTP calls (no localhost dependencies).
+    """
     pse_extractor, generator, orchestrator = _get_pipeline_components()
 
     draft_text = (
@@ -126,22 +135,57 @@ def _run_monolithic_pipeline(
 
     zip_buf = io.BytesIO()
     with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("specification.md", docs["specification.md"])
-        zf.writestr("claims.md", docs["claims.md"])
-        zf.writestr("abstract.md", docs["abstract.md"])
-        zf.writestr("disclosure.md", docs["disclosure.md"])
+        for name, content in docs.items():
+            zf.writestr(name, content)
         zf.writestr("quality_report.json", json.dumps(report, ensure_ascii=False, indent=2))
         zf.writestr("patent.docx", docx_bytes)
 
     return zip_buf.getvalue(), docs, report
 
 
-st.set_page_config(
-    page_title="CNIPA 智能专利生成系统",
-    page_icon="⚖️",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
+def _init_session_state() -> None:
+    st.session_state.setdefault("generated_result", None)  # {"zip_bytes":..., "docs":..., "report":...}
+    st.session_state.setdefault("processing_complete", False)
+    st.session_state.setdefault("last_error", "")
+
+
+def _reset_results() -> None:
+    st.session_state.generated_result = None
+    st.session_state.processing_complete = False
+    st.session_state.last_error = ""
+
+
+def _render_quality_details(report: Dict[str, Any]) -> None:
+    success = bool(report.get("success", False))
+    run_trace_id = str(report.get("run_trace_id", "") or "")
+    errors = list(report.get("errors", []) or [])
+    warnings = list(report.get("warnings", []) or [])
+    check_results = report.get("check_results", {}) or {}
+
+    st.write(f"Success: {success}")
+    if run_trace_id:
+        st.write(f"Run trace id: {run_trace_id}")
+
+    if warnings:
+        st.markdown("Warnings")
+        st.markdown("\n".join([f"- {w}" for w in warnings]))
+
+    if errors:
+        st.markdown("Errors")
+        st.markdown("\n".join([f"- {e}" for e in errors]))
+
+    if isinstance(check_results, dict) and check_results:
+        st.markdown("Checks")
+        for name, res in check_results.items():
+            if not isinstance(res, dict):
+                continue
+            st.write(f"- {name}: passed={res.get('passed')} score={res.get('score')}")
+            res_errors = res.get("errors") or []
+            if isinstance(res_errors, list) and res_errors:
+                st.markdown("\n".join([f"  - {x}" for x in res_errors]))
+
+
+_init_session_state()
 
 st.markdown(
     """
@@ -157,80 +201,119 @@ st.markdown(
 
 
 with st.sidebar:
-    st.title("⚙️ 系统控制台")
-    st.markdown("---")
+    st.title("Control Panel")
+    st.caption("Monolithic mode (no HTTP/localhost calls)")
 
     llm_api_key = _get_llm_api_key()
     llm_base_url = _get_setting("LLM_BASE_URL")
     llm_model = _get_setting("LLM_MODEL")
 
     if llm_api_key:
-        st.success("✅ 鉴权通过（LLM_API_KEY / OPENAI_API_KEY）")
+        st.success("Auth OK (LLM_API_KEY / OPENAI_API_KEY)")
     else:
-        st.info("ℹ️ 未配置 LLM 密钥（可在 Streamlit Secrets 中配置）")
+        st.info("No LLM key configured (set in Streamlit Secrets).")
 
     if llm_base_url:
         st.caption(f"LLM_BASE_URL: {llm_base_url}")
     if llm_model:
         st.caption(f"LLM_MODEL: {llm_model}")
 
-    st.markdown("---")
-    st.markdown("### 操作指南")
-    st.info("填写内容后点击【立即生成】。本版本为单体化架构：不再访问任何 localhost/HTTP API。")
+    st.divider()
+    if st.button("Reset Result", use_container_width=True):
+        _reset_results()
+        st.rerun()
 
 
-st.markdown("## ⚖️ CNIPA 智能专利生成系统（单体化）")
+st.markdown("## ⚖️ CNIPA Patent Draft Generator")
 
-col1, col2 = st.columns([2, 3])
-with col1:
-    title = st.text_input("专利名称", placeholder="例如：一种基于大模型的自动化专利撰写方法")
-    enable_checks = st.checkbox("启用质量检查", value=True)
+control_panel = st.container()
+result_workspace = st.container()
 
-with col2:
-    technical_field = st.text_area("技术领域", height=120, placeholder="例如：本发明涉及……")
+with control_panel:
+    st.subheader("Control Panel (Input)")
 
-background = st.text_area("背景技术", height=120, placeholder="现有技术存在的问题……")
-invention_content = st.text_area("发明内容", height=180, placeholder="本发明的技术方案与有益效果……")
-embodiments = st.text_area("具体实施方式", height=220, placeholder="实施例/步骤/结构细节……")
+    col1, col2 = st.columns([2, 3])
+    with col1:
+        st.text_input("Title", key="input_title", placeholder="e.g., An AI-assisted patent drafting system")
+        st.checkbox("Enable quality checks", key="input_enable_checks", value=True)
+    with col2:
+        st.text_area("Technical field", key="input_technical_field", height=120)
 
-st.markdown("###")
-generate_btn = st.button("立即生成四件套（本地计算，无HTTP）", type="primary", use_container_width=True)
+    st.text_area("Background", key="input_background", height=120)
+    st.text_area("Invention content", key="input_invention_content", height=180)
+    st.text_area("Embodiments", key="input_embodiments", height=220)
 
-if generate_btn:
-    if not title.strip() or not technical_field.strip():
-        st.warning("⚠️ 请先补全【专利名称】和【技术领域】。")
-    else:
-        with st.spinner("正在生成四件套并执行检查，请稍候..."):
-            try:
-                zip_bytes, docs, report = _run_monolithic_pipeline(
-                    title=title.strip(),
-                    technical_field=technical_field.strip(),
-                    background=background.strip(),
-                    invention_content=(invention_content.strip() or technical_field.strip()),
-                    embodiments=embodiments.strip(),
-                    enable_checks=bool(enable_checks),
-                )
-            except Exception as e:
-                st.error(f"❌ 生成失败：{e}")
-            else:
-                st.success(f"✅ 生成完成 | 质量分：{report.get('quality_score', 0.0):.2f}")
+    generate_btn = st.button("Generate", type="primary", use_container_width=True)
 
-                st.download_button(
-                    "下载产物 zip（四件套 + patent.docx + quality_report.json）",
-                    data=zip_bytes,
-                    file_name="patent_results.zip",
-                    mime="application/zip",
-                    use_container_width=True,
-                )
+    if generate_btn:
+        title = str(st.session_state.get("input_title", "") or "").strip()
+        technical_field = str(st.session_state.get("input_technical_field", "") or "").strip()
+        background = str(st.session_state.get("input_background", "") or "").strip()
+        invention_content = str(st.session_state.get("input_invention_content", "") or "").strip()
+        embodiments = str(st.session_state.get("input_embodiments", "") or "").strip()
+        enable_checks = bool(st.session_state.get("input_enable_checks", True))
 
-                tab1, tab2, tab3, tab4, tab5 = st.tabs(["说明书", "权利要求书", "摘要", "披露", "质量报告"])
-                with tab1:
-                    st.text_area("specification.md", value=docs.get("specification.md", ""), height=520)
-                with tab2:
-                    st.text_area("claims.md", value=docs.get("claims.md", ""), height=520)
-                with tab3:
-                    st.text_area("abstract.md", value=docs.get("abstract.md", ""), height=520)
-                with tab4:
-                    st.text_area("disclosure.md", value=docs.get("disclosure.md", ""), height=520)
-                with tab5:
-                    st.json(report)
+        if not title or not technical_field:
+            st.warning("Please fill in Title and Technical field.")
+        else:
+            st.session_state.processing_complete = False
+            st.session_state.last_error = ""
+            with st.spinner("Generating draft..."):
+                try:
+                    zip_bytes, docs, report = _run_monolithic_pipeline(
+                        title=title,
+                        technical_field=technical_field,
+                        background=background,
+                        invention_content=invention_content or technical_field,
+                        embodiments=embodiments,
+                        enable_checks=enable_checks,
+                    )
+                except Exception as e:
+                    st.session_state.last_error = str(e)
+                else:
+                    st.session_state.generated_result = {"zip_bytes": zip_bytes, "docs": docs, "report": report}
+                    st.session_state.processing_complete = True
+
+
+with result_workspace:
+    st.subheader("Result Workspace (Output)")
+
+    if st.session_state.get("last_error"):
+        st.error(f"Generation failed: {st.session_state.get('last_error')}")
+
+    generated = st.session_state.get("generated_result") or {}
+    report = generated.get("report", {}) if isinstance(generated, dict) else {}
+    docs = generated.get("docs", {}) if isinstance(generated, dict) else {}
+    zip_bytes = generated.get("zip_bytes", b"") if isinstance(generated, dict) else b""
+
+    score = float(report.get("quality_score", 0.0) or 0.0) if isinstance(report, dict) else 0.0
+    st.metric(label="Quality Score", value=f"{score:.2f}")
+
+    # Soft-fail architecture: NEVER block the flow based on quality-check outcomes.
+    if isinstance(report, dict) and (report.get("success") is False):
+        st.warning("Quality checks flagged issues, please review draft below.")
+
+    if zip_bytes:
+        st.download_button(
+            "Download ZIP (4 files + patent.docx + quality_report.json)",
+            data=zip_bytes,
+            file_name="patent_results.zip",
+            mime="application/zip",
+            use_container_width=True,
+        )
+
+    tab1, tab2, tab3, tab4 = st.tabs(["Specification", "Claims", "Abstract", "Disclosure"])
+    with tab1:
+        st.text_area("specification.md", value=str((docs or {}).get("specification.md", "")), height=520)
+    with tab2:
+        st.text_area("claims.md", value=str((docs or {}).get("claims.md", "")), height=520)
+    with tab3:
+        st.text_area("abstract.md", value=str((docs or {}).get("abstract.md", "")), height=520)
+    with tab4:
+        st.text_area("disclosure.md", value=str((docs or {}).get("disclosure.md", "")), height=520)
+
+    with st.expander("View Quality Details"):
+        if isinstance(report, dict) and report:
+            _render_quality_details(report)
+        else:
+            st.caption("No quality report available yet.")
