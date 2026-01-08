@@ -10,8 +10,8 @@ from typing import Any, Dict, Tuple
 
 import streamlit as st
 
-# Streamlit requirement: set_page_config must be the first Streamlit command.
-st.set_page_config(page_title="CNIPA Patent System", layout="wide")
+# Page Config (must be the first Streamlit command)
+st.set_page_config(page_title="CNIPA 智能专利生成系统 (车间科研版)", layout="wide", page_icon="⚖️")
 
 # Ensure `src/` imports work on Streamlit Community Cloud
 REPO_ROOT = Path(__file__).resolve().parent
@@ -24,35 +24,54 @@ from generators.four_piece_generator import FourPieceGenerator
 from orchestrator.pipeline_orchestrator import PipelineOrchestrator, ProcessingResult
 
 
+# -----------------------
+# Styling (Industrial UI)
+# -----------------------
+st.markdown(
+    """
+<style>
+/* Hide Streamlit chrome */
+#MainMenu {visibility: hidden;}
+header {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* Center titles */
+h1 { text-align: center; }
+.subtitle { text-align: center; color: gray; margin-bottom: 2em; }
+
+/* Block-style tabs */
+.stTabs [data-baseweb="tab-list"] { gap: 6px; }
+.stTabs [data-baseweb="tab"] { flex-grow: 1; text-align: center; font-weight: 700; }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
+# -----------------------
+# Helpers / Core Pipeline
+# -----------------------
 def _get_setting(key: str) -> str:
-    # 1) Streamlit Cloud secrets (highest priority)
     try:
         v = st.secrets.get(key)  # type: ignore[attr-defined]
         if v is not None and str(v).strip():
             return str(v).strip()
     except Exception:
         pass
-
-    # 2) Environment variables
-    v = os.getenv(key)
-    return (v or "").strip()
+    return (os.getenv(key) or "").strip()
 
 
 def _get_llm_api_key() -> str:
-    # Accept either name as "auth ok"
     return _get_setting("LLM_API_KEY") or _get_setting("OPENAI_API_KEY")
 
 
 def _apply_runtime_env_from_secrets() -> None:
-    # Let downstream modules (e.g. utils.llm_client.LLMClient) read from os.environ.
     llm_api_key = _get_llm_api_key()
     if llm_api_key:
         os.environ["LLM_API_KEY"] = llm_api_key
-
     llm_base_url = _get_setting("LLM_BASE_URL")
     if llm_base_url:
         os.environ["LLM_BASE_URL"] = llm_base_url
-
     llm_model = _get_setting("LLM_MODEL")
     if llm_model:
         os.environ["LLM_MODEL"] = llm_model
@@ -61,10 +80,7 @@ def _apply_runtime_env_from_secrets() -> None:
 @st.cache_resource
 def _get_pipeline_components() -> Tuple[PSEExtractor, FourPieceGenerator, PipelineOrchestrator]:
     _apply_runtime_env_from_secrets()
-    pse_extractor = PSEExtractor()
-    generator = FourPieceGenerator()
-    orchestrator = PipelineOrchestrator(enable_checks=True)
-    return pse_extractor, generator, orchestrator
+    return PSEExtractor(), FourPieceGenerator(), PipelineOrchestrator(enable_checks=True)
 
 
 def _build_minimal_report(result: ProcessingResult) -> Dict[str, Any]:
@@ -88,10 +104,6 @@ def _run_monolithic_pipeline(
     enable_checks: bool,
     llm_temperature: float,
 ) -> Tuple[bytes, Dict[str, str], Dict[str, Any]]:
-    """
-    Monolithic pipeline: runs everything in-process.
-    Never makes any HTTP calls (no localhost dependencies).
-    """
     pse_extractor, generator, orchestrator = _get_pipeline_components()
 
     draft_text = (
@@ -140,17 +152,13 @@ def _run_monolithic_pipeline(
     return zip_buf.getvalue(), docs, report
 
 
-def _create_zip_bytes(
-    generated_results: Dict[str, str],
-    report: Dict[str, Any],
-    docx_bytes: bytes,
-) -> bytes:
+def _create_zip_bytes(generated_results: Dict[str, str], report: Dict[str, Any], docx_bytes: bytes) -> bytes:
     zip_buf = io.BytesIO()
     with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
-        zf.writestr("specification.md", (generated_results.get("specification.md") or ""))
-        zf.writestr("claims.md", (generated_results.get("claims.md") or ""))
-        zf.writestr("abstract.md", (generated_results.get("abstract.md") or ""))
-        zf.writestr("disclosure.md", (generated_results.get("disclosure.md") or ""))
+        zf.writestr("claims.md", generated_results.get("claims.md", ""))
+        zf.writestr("specification.md", generated_results.get("specification.md", ""))
+        zf.writestr("abstract.md", generated_results.get("abstract.md", ""))
+        zf.writestr("disclosure.md", generated_results.get("disclosure.md", ""))
         zf.writestr("quality_report.json", json.dumps(report or {}, ensure_ascii=False, indent=2))
         if docx_bytes:
             zf.writestr("patent.docx", docx_bytes)
@@ -158,142 +166,78 @@ def _create_zip_bytes(
 
 
 def _init_session_state() -> None:
-    # Canonical persisted outputs (for edit/save)
-    st.session_state.setdefault("generated_results", {})  # specification.md/claims.md/abstract.md/disclosure.md
+    st.session_state.setdefault("generated_results", {})
     st.session_state.setdefault("zip_bytes", b"")
     st.session_state.setdefault("docx_bytes", b"")
     st.session_state.setdefault("quality_report", {})
-
-    # Editor buffers (bound to widgets)
-    st.session_state.setdefault("edit_specification", "")
-    st.session_state.setdefault("edit_claims", "")
-    st.session_state.setdefault("edit_abstract", "")
-    st.session_state.setdefault("edit_disclosure", "")
-
-    # UX state
     st.session_state.setdefault("processing_complete", False)
     st.session_state.setdefault("last_error", "")
-    st.session_state.setdefault("save_message", "")
-
-
-def _reset_results() -> None:
-    st.session_state.generated_results = {}
-    st.session_state.zip_bytes = b""
-    st.session_state.docx_bytes = b""
-    st.session_state.quality_report = {}
-    st.session_state.edit_specification = ""
-    st.session_state.edit_claims = ""
-    st.session_state.edit_abstract = ""
-    st.session_state.edit_disclosure = ""
-    st.session_state.processing_complete = False
-    st.session_state.last_error = ""
-    st.session_state.save_message = ""
-
-
-def _render_quality_details(report: Dict[str, Any]) -> None:
-    success = bool(report.get("success", False))
-    run_trace_id = str(report.get("run_trace_id", "") or "")
-    errors = list(report.get("errors", []) or [])
-    warnings = list(report.get("warnings", []) or [])
-    check_results = report.get("check_results", {}) or {}
-
-    st.write(f"Success: {success}")
-    if run_trace_id:
-        st.write(f"Run trace id: {run_trace_id}")
-
-    if warnings:
-        st.markdown("Warnings")
-        st.markdown("\n".join([f"- {w}" for w in warnings]))
-
-    if errors:
-        st.markdown("Errors")
-        st.markdown("\n".join([f"- {e}" for e in errors]))
-
-    if isinstance(check_results, dict) and check_results:
-        st.markdown("Checks")
-        for name, res in check_results.items():
-            if not isinstance(res, dict):
-                continue
-            st.write(f"- {name}: passed={res.get('passed')} score={res.get('score')}")
-            res_errors = res.get("errors") or []
-            if isinstance(res_errors, list) and res_errors:
-                st.markdown("\n".join([f"  - {x}" for x in res_errors]))
 
 
 _init_session_state()
 
+
+# -----------------------
+# Header
+# -----------------------
+st.markdown("<h1 style='text-align: center;'>国家知识产权局专利自动生成系统</h1>", unsafe_allow_html=True)
 st.markdown(
-    """
-    <style>
-    .stApp { font-family: "Microsoft YaHei", sans-serif; }
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    </style>
-    """,
+    "<p class='subtitle'>专注车间科技转化 · 助力一线创新实践</p>",
     unsafe_allow_html=True,
 )
 
 
+# -----------------------
+# Sidebar (系统参数设置)
+# -----------------------
 with st.sidebar:
-    st.title("Control Panel")
-    st.caption("Monolithic mode (no HTTP/localhost calls)")
-
-    llm_api_key = _get_llm_api_key()
-    llm_base_url = _get_setting("LLM_BASE_URL")
-    llm_model = _get_setting("LLM_MODEL")
-
-    if llm_api_key:
-        st.success("Auth OK (LLM_API_KEY / OPENAI_API_KEY)")
-    else:
-        st.info("No LLM key configured (set in Streamlit Secrets).")
-
-    if llm_base_url:
-        st.caption(f"LLM_BASE_URL: {llm_base_url}")
-    if llm_model:
-        st.caption(f"LLM_MODEL: {llm_model}")
-
-    st.slider("Creativity", min_value=0.0, max_value=1.0, value=0.2, step=0.05, key="llm_temperature")
-
-    st.divider()
-    if st.button("Reset Result", use_container_width=True):
-        _reset_results()
-        st.rerun()
+    st.markdown("## ⚙️ 系统参数设置")
+    st.slider(
+        "创新发散度 (Temperature)",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.2,
+        step=0.05,
+        key="llm_temperature",
+        help="0.2=严谨模式(权利要求); 0.5=发散模式(背景技术)",
+    )
+    st.info("当前内核: DeepSeek V3 (商业版)")
 
 
-st.markdown("## ⚖️ CNIPA Patent System")
+# -----------------------
+# Main Layout (Split View)
+# -----------------------
+col_input, col_output = st.columns([0.4, 0.6])
 
-input_col, output_col = st.columns([0.4, 0.6])
 
-with input_col:
-    st.markdown("### ✍️ Input Workspace")
-
-    st.text_input("Title", key="input_title", placeholder="e.g., An AI-assisted patent drafting system")
-    st.text_area("Technical field", key="input_technical_field", height=120)
-    st.text_area("Background", key="input_background", height=120)
-    st.text_area("Invention content", key="input_invention_content", height=180)
-    st.text_area("Embodiments", key="input_embodiments", height=220)
-    st.checkbox("Enable quality checks", key="input_enable_checks", value=True)
+# -----------------------
+# Left: 撰写工作台
+# -----------------------
+with col_input:
+    st.markdown("### ✍️ 撰写工作台")
+    inv_title = st.text_input("发明名称", key="input_title")
+    domain = st.text_input("所属技术领域", key="input_technical_field", placeholder="例如：卷烟包装设备、视觉检测")
+    bg = st.text_area("背景技术（现有技术痛点）", key="input_background", height=150)
+    inv_content = st.text_area("发明内容（核心技术方案）", key="input_invention_content", height=200)
+    impl = st.text_area("具体实施方式（可选）", key="input_embodiments", height=100)
 
     st.markdown("###")
-    generate_btn = st.button("Generate", type="primary", use_container_width=True)
+    generate_btn = st.button(" 开始生成专利申请草稿", type="primary", use_container_width=True)
 
     if generate_btn:
-        title = str(st.session_state.get("input_title", "") or "").strip()
-        technical_field = str(st.session_state.get("input_technical_field", "") or "").strip()
-        background = str(st.session_state.get("input_background", "") or "").strip()
-        invention_content = str(st.session_state.get("input_invention_content", "") or "").strip()
-        embodiments = str(st.session_state.get("input_embodiments", "") or "").strip()
-        enable_checks = bool(st.session_state.get("input_enable_checks", True))
+        title = (inv_title or "").strip()
+        technical_field = (domain or "").strip()
+        background = (bg or "").strip()
+        invention_content = (inv_content or "").strip()
+        embodiments = (impl or "").strip()
         llm_temperature = float(st.session_state.get("llm_temperature", 0.2) or 0.2)
 
         if not title or not technical_field:
-            st.warning("Please fill in Title and Technical field.")
+            st.warning("请先填写【发明名称】与【所属技术领域】。")
         else:
-            st.session_state.processing_complete = False
             st.session_state.last_error = ""
-            st.session_state.save_message = ""
-            with st.spinner("Generating draft..."):
+            st.session_state.processing_complete = False
+            with st.spinner("正在生成草稿并执行质检..."):
                 try:
                     zip_bytes, docs, report = _run_monolithic_pipeline(
                         title=title,
@@ -301,7 +245,7 @@ with input_col:
                         background=background,
                         invention_content=invention_content or technical_field,
                         embodiments=embodiments,
-                        enable_checks=enable_checks,
+                        enable_checks=True,
                         llm_temperature=llm_temperature,
                     )
                 except Exception as e:
@@ -310,78 +254,66 @@ with input_col:
                     st.session_state.generated_results = dict(docs or {})
                     st.session_state.quality_report = dict(report or {})
                     st.session_state.zip_bytes = zip_bytes or b""
-                    # Keep patent.docx if present (for regenerated ZIP after edits)
                     try:
                         with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
                             st.session_state.docx_bytes = zf.read("patent.docx")
                     except Exception:
                         st.session_state.docx_bytes = b""
-
-                    # Initialize editor buffers to generated content (overwrites previous edits on new generation)
-                    st.session_state.edit_specification = st.session_state.generated_results.get("specification.md", "")
-                    st.session_state.edit_claims = st.session_state.generated_results.get("claims.md", "")
-                    st.session_state.edit_abstract = st.session_state.generated_results.get("abstract.md", "")
-                    st.session_state.edit_disclosure = st.session_state.generated_results.get("disclosure.md", "")
                     st.session_state.processing_complete = True
+                    st.toast("✅ 生成完成，可在右侧编辑与导出。")
 
-with output_col:
-    st.markdown("###  Review & Export")
+
+# -----------------------
+# Right: 生成结果与质检
+# -----------------------
+with col_output:
+    st.markdown("### 🧪 生成结果与质检")
 
     if st.session_state.get("last_error"):
-        st.error(f"Generation failed: {st.session_state.get('last_error')}")
+        st.error(f"生成失败：{st.session_state.get('last_error')}")
 
-    report = st.session_state.get("quality_report") or {}
-    docs = st.session_state.get("generated_results") or {}
-    zip_bytes = st.session_state.get("zip_bytes") or b""
+    if not st.session_state.get("generated_results"):
+        st.info(" 请在左侧工作台输入技术方案并启动生成。")
+    else:
+        report = st.session_state.get("quality_report") or {}
+        score = float((report or {}).get("quality_score", 0.0) or 0.0)
+        st.write(f"✅ 状态：生成完成 | 综合评分：{score:.2f}")
 
-    score = float(report.get("quality_score", 0.0) or 0.0) if isinstance(report, dict) else 0.0
-    st.metric(label="Quality Score", value=f"{score:.2f}")
+        gen = st.session_state.get("generated_results") or {}
 
-    if isinstance(report, dict) and (report.get("success") is False):
-        st.warning("Quality checks flagged issues, please review draft below.")
+        tab_claims, tab_spec, tab_abs, tab_dis = st.tabs(["权利要求书", "说明书", "说明书摘要", "技术交底书"])
+        with tab_claims:
+            st.text_area("权利要求书（可编辑）", value=gen.get("claims.md", ""), key="widget_claims", height=600)
+        with tab_spec:
+            st.text_area("说明书（可编辑）", value=gen.get("specification.md", ""), key="widget_spec", height=600)
+        with tab_abs:
+            st.text_area("说明书摘要（可编辑）", value=gen.get("abstract.md", ""), key="widget_abs", height=600)
+        with tab_dis:
+            st.text_area("技术交底书（可编辑）", value=gen.get("disclosure.md", ""), key="widget_dis", height=600)
 
-    if st.session_state.get("save_message"):
-        st.success(st.session_state.get("save_message"))
-
-    if zip_bytes:
-        st.download_button(
-            "Download ZIP (4 files + patent.docx + quality_report.json)",
-            data=zip_bytes,
-            file_name="patent_results.zip",
-            mime="application/zip",
-            use_container_width=True,
-        )
-
-    tab1, tab2, tab3, tab4 = st.tabs(["Specification", "Claims", "Abstract", "Disclosure"])
-    with tab1:
-        st.text_area("specification.md", key="edit_specification", height=600)
-    with tab2:
-        st.text_area("claims.md", key="edit_claims", height=600)
-    with tab3:
-        st.text_area("abstract.md", key="edit_abstract", height=600)
-    with tab4:
-        st.text_area("disclosure.md", key="edit_disclosure", height=600)
-
-    st.markdown("###")
-    save_btn = st.button("💾 Save Changes & Update ZIP", use_container_width=True)
-    if save_btn:
-        # Update session_state outputs from current editor buffers
-        st.session_state.generated_results = {
-            "specification.md": str(st.session_state.get("edit_specification", "") or ""),
-            "claims.md": str(st.session_state.get("edit_claims", "") or ""),
-            "abstract.md": str(st.session_state.get("edit_abstract", "") or ""),
-            "disclosure.md": str(st.session_state.get("edit_disclosure", "") or ""),
-        }
-        st.session_state.zip_bytes = _create_zip_bytes(
-            st.session_state.generated_results,
-            dict(st.session_state.get("quality_report") or {}),
-            bytes(st.session_state.get("docx_bytes") or b""),
-        )
-        st.session_state.save_message = "✅ Draft updated. Ready to download."
-        st.rerun()
-
-    with st.expander("View Quality Details"):
-        if isinstance(report, dict) and report:
-            _render_quality_details(report)
-        else:
-            st.caption("No quality report available yet.")
+        st.markdown("###")
+        col_save, col_dl = st.columns(2)
+        with col_save:
+            if st.button(" 保存修改并更新压缩包", type="secondary", use_container_width=True):
+                st.session_state.generated_results = {
+                    "claims.md": str(st.session_state.get("widget_claims", "") or ""),
+                    "specification.md": str(st.session_state.get("widget_spec", "") or ""),
+                    "abstract.md": str(st.session_state.get("widget_abs", "") or ""),
+                    "disclosure.md": str(st.session_state.get("widget_dis", "") or ""),
+                }
+                st.session_state.zip_bytes = _create_zip_bytes(
+                    st.session_state.generated_results,
+                    dict(st.session_state.get("quality_report") or {}),
+                    bytes(st.session_state.get("docx_bytes") or b""),
+                )
+                st.success("✅ Draft updated. Ready to download.")
+        with col_dl:
+            st.download_button(
+                " 下载申报材料 (ZIP)",
+                data=st.session_state.get("zip_bytes") or b"",
+                file_name="patent_results.zip",
+                mime="application/zip",
+                type="primary",
+                use_container_width=True,
+                disabled=not bool(st.session_state.get("zip_bytes")),
+            )
