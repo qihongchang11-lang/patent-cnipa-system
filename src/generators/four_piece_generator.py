@@ -342,6 +342,17 @@ class FourPieceGenerator:
                 "- independent_claim.text 必须包含“其特征在于”。\n"
             )
 
+            constraint_block = (
+                "【约束块：反营销与长度（必须遵守）】\n"
+                "FORBIDDEN（严禁在输出中出现以下营销/绝对化用语及同义表达）：\n"
+                "- best（最好）、perfect（完美）、first（第一）、must（必须）、revolutionary（革命性）、thoroughly（彻底）\n"
+                "- 以及“最优/最佳/领先/唯一/绝对/完全/必然/显然/彻底”等绝对化或宣传性表述\n"
+                "REQUIRED（优先使用客观技术表达）：\n"
+                "- 有效、利于、用于、能够、适于、被配置为（configured to）、通过……实现\n"
+                "长度限制（安全缓冲）：\n"
+                "- 标题（发明名称）应为纯技术特征概括，严格不超过 25 个中文字符；不要包含宣传性词汇。\n"
+            )
+
             section_d = (
                 "【D. 思考过程（仅内部执行，不要输出思考过程）】\n"
                 "Step 1: Analyze the input to identify the core inventive point.\n"
@@ -369,7 +380,7 @@ class FourPieceGenerator:
                 f"关键技术特征（可用）：{kt_names}\n"
             )
 
-            prompt = "\n\n".join([section_a, section_b, section_c, section_d, output_contract, context])
+            prompt = "\n\n".join([section_a, section_b, section_c, constraint_block, section_d, output_contract, context])
 
             # Claims should be rigorous: clamp temperature to 0.2~0.4.
             claims_temperature = float(min(max(float(llm_temperature), 0.2), 0.4))
@@ -524,17 +535,30 @@ class FourPieceGenerator:
                 "摘要中的技术名词必须与【发明内容】/【关键技术特征】完全一致；严禁同义词替换与新增术语。\n"
             )
 
+            constraint_block = (
+                "【约束块：反营销与长度（必须遵守）】\n"
+                "FORBIDDEN（严禁在输出中出现以下营销/绝对化用语及同义表达）：\n"
+                "- best（最好）、perfect（完美）、first（第一）、must（必须）、revolutionary（革命性）、thoroughly（彻底）\n"
+                "- 以及“最优/最佳/领先/唯一/绝对/完全/必然/显然/彻底”等绝对化或宣传性表述\n"
+                "REQUIRED（优先使用客观技术表达）：\n"
+                "- 有效、利于、用于、能够、适于、被配置为（configured to）、通过……实现\n"
+                "长度限制（安全缓冲）：\n"
+                "- 标题（发明名称）应为纯技术特征概括，严格不超过 25 个中文字符。\n"
+                "- 摘要 summary 必须严格不超过 280 个中文字符（为 300 字上限预留缓冲）。\n"
+            )
+
             section_d = (
                 "【D. 思考过程（仅内部执行，不要输出思考过程）】\n"
                 "Step 1: Identify the core inventive point.\n"
                 "Step 2: Ensure terminology matches the invention content.\n"
                 "Step 3: Write a concise, objective abstract.\n"
+                "Step 4: Before outputting summary, count characters internally; if > 280, condense immediately.\n"
             )
 
             output_contract = (
                 "【输出要求（JSON）】\n"
                 "- 输出必须为 JSON，结构严格符合给定 JSON Schema（字段名不得变更）。\n"
-                "- summary：30~500 字，客观表述，不含绝对化/夸大/主观/商业宣传用语。\n"
+                "- summary：客观表述，不含绝对化/夸大/主观/商业宣传用语；并且严格不超过 280 个中文字符。\n"
                 "- 内容应包含：技术领域、要解决的技术问题、技术方案要点、技术效果（客观）。\n"
             )
 
@@ -546,7 +570,7 @@ class FourPieceGenerator:
                 f"关键技术特征（可用）：{kt_names}\n"
             )
 
-            prompt = "\n\n".join([section_a, section_b, section_d, output_contract, context])
+            prompt = "\n\n".join([section_a, section_b, constraint_block, section_d, output_contract, context])
 
             # Abstract can allow slightly more creativity than claims, but keep bounded.
             abstract_temperature = float(min(max(float(llm_temperature), 0.2), 0.6))
